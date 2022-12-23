@@ -38,7 +38,7 @@
       ((environment 'draw) 'draw-world!)) ;Call draw-world! from Draw ADT
 
     (define (time-handler ms)
-      (if (>= monster-spawn-time 1000)
+      (if (>= monster-spawn-time 500)
           (begin (set! monster-spawn-time 0)
                  ((wave 'next-monster!))))
       (if (>= monster-move-time 10) ;Only move monster each 10 ms, so that it runs sort of even on every computer

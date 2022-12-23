@@ -21,7 +21,7 @@
   
   (define (load-wave!)
     (set! wave (+ wave 1))
-    (cond ((= wave 1) (fill-wave-list 5))))
+    (cond ((= wave 1) (fill-wave-list 10))))
   
   (define (dispatch mes)
     (cond ((eq? mes 'next-monster!) next-monster!)

@@ -38,9 +38,9 @@
     (define (shoot!)
       (if (and target (= cooldown 0))
           (begin
-            ((target 'hit!))
-;            (let ((projectile (make-projectile position target)))
-;              ((environment 'draw-entity!) projectile))
+            ;((target 'hit!))
+            (let ((projectile (make-projectile position target)))
+              ((((environment 'draw) 'projectile-layer) 'add-drawable!) (projectile 'get-tile)))
             (set! cooldown 1000)
             (if (= (target 'get-health) 0)
                 (set! target #f)))))

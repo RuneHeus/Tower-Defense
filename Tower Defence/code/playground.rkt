@@ -62,10 +62,9 @@
 ;       (if (and (eq? button 'left)
 ;                (eq? status 'pressed))
 ;           (let* ((tower (make-tile 50 50 "../images/Towers/tower1.png" "../images/Towers/tower1_mask.png"))
-;                  (projectile (make-projectile tower (tower 'target))))
+;                  (projectile (make-projectile (make-position (tower 'get-x) (tower 'get-y)) #f)))
 ;             ((tower 'set-x!) (- x (modulo x 50)))
 ;             ((tower 'set-y!) (- y (modulo y 50)))
 ;             
 ;             ((layer 'add-drawable!) tower)))))
-;
 (generate-mask "../images/Projectiles/projectile.png" "white")
