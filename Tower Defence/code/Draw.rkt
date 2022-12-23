@@ -1,0 +1,58 @@
+(#%require "Graphics.rkt")
+(load "Constants.rkt")
+
+(define (make-draw)
+  (let* ((window (make-window width height "Tower Defense" 60))
+         (background-layer ((window 'new-layer!)))
+         ;(pos-layer ((window 'new-layer!)))
+         (entity-layer ((window 'new-layer!)))
+         (projectile-layer ((window 'new-layer!))))
+    
+    (define (reposition! obj position)
+      (let ((obj-tile (obj 'get-tile)))
+        ((obj-tile 'set-x!) (+ (- (/ (* (obj-tile 'get-w) size-factor) 2) (/ (obj-tile 'get-w) 2)) (position 'get-x)))
+        ((obj-tile 'set-y!) (+ (- (/ (* (obj-tile 'get-h) size-factor) 2) (/ (obj-tile 'get-h) 2)) (position 'get-y)))))
+
+    (define (draw! drawable)
+      ((entity-layer 'add-drawable!) drawable))
+    
+    (define (draw-world!)
+      (let ((tile (make-tile width height)))
+        ((tile 'draw-rectangle!) 0 0 width height "green")
+        ((tile 'draw-rectangle!) (start-position 'get-x) (start-position 'get-y) (* 300 size-factor) (* 50 size-factor) "brown") ;Pad ((0,5) -> (15,5)) (division)
+        ((tile 'draw-rectangle!) (* 300 size-factor) (* 100 size-factor) (* size-factor 50) (* 400 size-factor) "brown") ;Pad ((15,5) -> (15,35)) (division)
+        ((tile 'draw-rectangle!) (* size-factor 300) (* size-factor 500) (* 500 size-factor)  (* 50 size-factor) "brown") ;Pad ((15,35) -> (40,35)) (division)
+        ((background-layer 'add-drawable!) tile))
+      ;    (define (draw-stripes-horizontal!)
+      ;      (let loop ((pos-tile (make-tile width height))
+      ;                 (y 0))
+      ;        (cond ((> y height) ((pos-layer 'add-drawable!) pos-tile))
+      ;              (else
+      ;               (begin
+      ;                 ((pos-tile 'draw-line!) 0 y width y 1 "black")
+      ;                 (loop pos-tile (+ y (* 50 size-factor))))))))
+      ;
+      ;    (define (draw-stripes-vertical!)
+      ;      (let loop ((pos-tile (make-tile width height))
+      ;                 (x 0))
+      ;        (cond ((> x width) ((pos-layer 'add-drawable!) pos-tile))
+      ;              (else
+      ;               (begin
+      ;                 ((pos-tile 'draw-line!) x 0 x height 1 "black")
+      ;                 (loop pos-tile (+ x (* 50 size-factor))))))))
+      ;                                      
+      ;    (draw-stripes-horizontal!)
+      ;    (draw-stripes-vertical!)
+      )
+
+    (define (dispatch mes)
+      (cond ((eq? mes 'draw!) draw!)
+            ((eq? mes 'reposition!) reposition!)
+            ((eq? mes 'draw-world!) (draw-world!))
+            ((eq? mes 'get-window) window)
+            ((eq? mes 'entity-layer) entity-layer)
+            ((eq? mes 'make-tile) make-tile)
+            ((eq? mes 'tower-layer) tower-layer)
+            ((eq? mes 'projectile-layer) projectile-layer)
+            (else (display "Error: Wrong dispatch message (Draw.rkt)"))))
+    dispatch))

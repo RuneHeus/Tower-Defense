@@ -1,0 +1,13 @@
+(load "Position.rkt")
+
+
+; Path positions
+(define start-position (make-position 0 100))
+(define end-position (make-position 800 500))
+
+
+;UI
+(define width 800) ;width of the window
+(define height 600) ;Height of the window
+
+(define devision 20) ;The grid division of the UI
