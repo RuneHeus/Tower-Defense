@@ -39,7 +39,7 @@
       (if (and target (= cooldown 0))
           (begin
             ;((target 'hit!))
-            (let ((projectile (make-projectile position target)))
+            (let ((projectile (make-projectile (make-position (position 'get-x) (position 'get-y)) target)))
               ((((environment 'draw) 'projectile-layer) 'add-drawable!) (projectile 'get-tile)))
             (set! cooldown 1000)
             (if (= (target 'get-health) 0)

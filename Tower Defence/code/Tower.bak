@@ -1,7 +1,8 @@
 (#%require "Graphics.rkt")
 (load "Position.rkt")
+(load "Projectile.rkt")
 
-(define (make-tower position)
+(define (make-tower position environment)
 
   (let ((tile (make-tile 50 50 "../images/Towers/tower1.png" "../images/Towers/tower1_mask.png"))
          (area '())
@@ -37,7 +38,12 @@
     (define (shoot!)
       (if (and target (= cooldown 0))
           (begin
-            ((target 'hit!))
+            ;((target 'hit!))
+            (let ((projectile (make-projectile position target)))
+              ((((environment 'draw) 'projectile-layer) 'add-drawable!) (projectile 'get-tile)))
+            (display ((target 'get-position) 'get-x))
+            (newline)
+            (display ((target 'get-position) 'get-y))
             (set! cooldown 1000)
             (if (= (target 'get-health) 0)
                 (set! target #f)))))

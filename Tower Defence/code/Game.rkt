@@ -8,7 +8,7 @@
          (monster-move-time 0))
   
     (define (start!) ;Calls all the necessary procedures to start the game
-      (clean!)
+      ;(clean!)
       (load-world!)
       ((wave 'load-wave!))
       (game-loop))
@@ -38,7 +38,7 @@
       ((environment 'draw) 'draw-world!)) ;Call draw-world! from Draw ADT
 
     (define (time-handler ms)
-      (if (>= monster-spawn-time 500)
+      (if (>= monster-spawn-time 1000)
           (begin (set! monster-spawn-time 0)
                  ((wave 'next-monster!))))
       (if (>= monster-move-time 10) ;Only move monster each 10 ms, so that it runs sort of even on every computer

@@ -8,7 +8,7 @@
          (monster-move-time 0))
   
     (define (start!) ;Calls all the necessary procedures to start the game
-      (clean!)
+;      (clean!)
       (load-world!)
       ((wave 'load-wave!))
       (game-loop))
@@ -31,7 +31,7 @@
        (lambda (button status x y)
          (if (and (eq? button 'left)
                   (eq? status 'pressed))
-             (let ((tower (make-tower (make-position (- x (- (modulo x (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50)))) (- y (- (modulo y (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50))))))))
+             (let ((tower (make-tower (make-position (- x (- (modulo x (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50)))) (- y (- (modulo y (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50))))) environment)))
                ((environment 'add-entity!) tower))))))
   
     (define (load-world!)
