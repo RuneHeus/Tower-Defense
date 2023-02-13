@@ -7,7 +7,8 @@
   (let ((tile (make-tile 50 50 "../images/Towers/tower1.png" "../images/Towers/tower1_mask.png"))
          (area '())
          (cooldown 0)
-         (target #f))
+         (target #f)
+         (projectile #f))
   
     (define (set-scale) ;This sets the scale of the tower
       ((tile 'set-scale!) size-factor)
@@ -38,9 +39,10 @@
     (define (shoot!)
       (if (and target (= cooldown 0))
           (begin
-            ;((target 'hit!))
-            (let ((projectile (make-projectile (make-position (position 'get-x) (position 'get-y)) target)))
-              ((((environment 'draw) 'projectile-layer) 'add-drawable!) (projectile 'get-tile)))
+            (if (not (equals? projectile #f))
+                (begin 
+                  (set! projectile (make-projectile (make-position (position 'get-x) (position 'get-y)) target environment))
+                  ((((environment 'draw) 'projectile-layer) 'add-drawable!) (projectile 'get-tile))))
             (set! cooldown 1000)
             (if (= (target 'get-health) 0)
                 (set! target #f)))))
