@@ -21,10 +21,13 @@
 
     (define (draw-entity! entity)
       ((draw 'draw!) (entity 'get-tile)))
+
+    (define (set-monsters! val)
+      (set! monsters val))
   
     (define (move-monster! monster)
       (monster 'set-next-position!)
-      ((draw 'reposition!) monster (monster 'get-position)))
+      ((draw 'reposition!) (monster 'get-tile) (monster 'get-position)))
 
     (define (remove-monster! monster)
       (define (remove list)
@@ -34,7 +37,33 @@
                 (remove (cdr list))
                 (cons (car list) (remove (cdr list))))))
       (set! monsters (remove monsters))
-      (((draw 'entity-layer) 'remove-drawable!) (monster 'get-tile)))
+      (((draw 'entity-layer) 'remove-drawable!) (monster 'get-tile))
+      (map (lambda (tower)
+             ((tower 'remove-target) monster)) towers))
+
+    (define (remove-all-monsters!)
+      (map
+       (lambda (monster)
+         (((draw 'entity-layer) 'remove-drawable!) (monster 'get-tile)))
+       monsters))
+
+    (define (remove-all-towers!)
+      (map
+       (lambda (tower)
+         (((draw 'entity-layer) 'remove-drawable!) (tower 'get-tile)))
+       towers))
+
+    (define (remove-all-projectiles!)
+      (map
+       (lambda (tower)
+         (if (tower 'get-projectile)
+             (((draw 'projectile-layer) 'remove-drawable!) ((tower 'get-projectile) 'get-tile))))
+       towers))
+
+    (define (remove-all-objects!)
+      (remove-all-monsters!)
+      (remove-all-towers!)
+      (remove-all-projectiles!))
   
     (define (set-new-increment! monster)
       (map (lambda (position)
@@ -49,7 +78,7 @@
              (if (<= (monster 'get-health) 0)
                  (remove-monster! monster)
                  (begin
-                   (set-new-increment! monster)
+                   (set-new-increment! monster) ;Calculates the way it has to move
                    (move-monster! monster))))
            monsters))
 
@@ -71,10 +100,24 @@
 
     (define (towers-loop ms)
       (map (lambda (tower)
+             (towers-shoot tower)
              (calculate-cooldown tower ms)
-             (check-tower-areas tower)
-             (towers-shoot tower))
+             (check-tower-areas tower))
            towers))
+
+    (define (set-towers! val)
+      (set! towers val))
+
+    (define (find-tower-by-projectile proj-position)
+      (define (iter lijst)
+        (if (not (null? lijst))
+            (if ((car lijst) 'get-projectile)
+                (if (((((car lijst) 'get-projectile) 'get-position) 'equal?) proj-position)
+                           (car lijst)
+                    (iter (cdr lijst)))
+                (iter (cdr lijst)))
+            '()))
+      (iter towers))
 
     (define (towers-shoot tower)
       ((tower 'shoot!)))
@@ -93,13 +136,16 @@
     (define (dispatch mes)
       (cond ((eq? mes 'draw) draw)
             ((eq? mes 'get-monsters) monsters)
+            ((eq? mes 'set-monsters!) set-monsters!)
+            ((eq? mes 'set-towers!) set-towers!)
             ((eq? mes 'get-path) path)
             ((eq? mes 'add-entity!) add-entity!)
-            ((eq? mes 'get-monsters) monsters)
             ((eq? mes 'monsters-loop) monsters-loop)
             ((eq? mes 'check-tower-areas) check-tower-areas)
             ((eq? mes 'on-path?) on-path?)
             ((eq? mes 'towers-loop) towers-loop)
             ((eq? mes 'draw-entity!) draw-entity!)
+            ((eq? mes 'find-tower-by-projectile) find-tower-by-projectile)
+            ((eq? mes 'remove-all-objects!) remove-all-objects!)
             (else (display "Error: Wrong dispatch message (Environment.rkt) -> ") (display mes))))
     dispatch))

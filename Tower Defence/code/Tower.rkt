@@ -5,10 +5,10 @@
 (define (make-tower position environment)
 
   (let ((tile (make-tile 50 50 "../images/Towers/tower1.png" "../images/Towers/tower1_mask.png"))
-         (area '())
-         (cooldown 0)
-         (target #f)
-         (projectile #f))
+        (area '())
+        (cooldown 0)
+        (target #f)
+        (projectile #f))
   
     (define (set-scale) ;This sets the scale of the tower
       ((tile 'set-scale!) size-factor)
@@ -36,29 +36,40 @@
                   ((and (eq? target monster) (not change?))
                    (set! target #f))))))
 
+    (define (remove-target monster)
+      (if (eq? monster target)
+          (set! target #f)))
+    
     (define (shoot!)
-      (if (and target (= cooldown 0))
-          (begin
-            (if (not (equals? projectile #f))
-                (begin 
-                  (set! projectile (make-projectile (make-position (position 'get-x) (position 'get-y)) target environment))
-                  ((((environment 'draw) 'projectile-layer) 'add-drawable!) (projectile 'get-tile))))
-            (set! cooldown 1000)
-            (if (= (target 'get-health) 0)
-                (set! target #f)))))
-
+      (if target
+          (if (= cooldown 0)
+              (if projectile
+                  ((projectile 'move!))
+                  (begin
+                    (set! projectile (make-projectile (make-position (position 'get-x) (position 'get-y)) target environment))
+                    ((((environment 'draw) 'projectile-layer) 'add-drawable!) (projectile 'get-tile))
+                    (set! cooldown 2000)))
+              (if projectile
+                  ((projectile 'move!))))))
+    
     (define (set-cooldown! num)
       (set! cooldown num))
+
+    (define (set-projectile! value)
+      (set! projectile value))
   
     (define (dispatch mes)
       (cond ((eq? mes 'get-tile) tile)
             ((eq? mes 'get-position) position)
-            ((eq? mes 'entity?) 'tower)
+            ((eq? mes 'entity?) 'tower);
             ((eq? mes 'check-area) check-area)
             ((eq? mes 'target) target)
             ((eq? mes 'cooldown) cooldown)
             ((eq? mes 'shoot!) shoot!)
-            ((eq? mes 'set-cooldown!) set-cooldown!)))
+            ((eq? mes 'set-cooldown!) set-cooldown!)
+            ((eq? mes 'get-projectile) projectile)
+            ((eq? mes 'set-projectile!) set-projectile!)
+            ((eq? mes 'remove-target) remove-target)))
     (set-scale)
     (generate-area)
     dispatch))

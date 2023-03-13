@@ -7,17 +7,25 @@
   (let ((monster-spawn-time 0)
          (monster-move-time 0))
   
-    (define (start!) ;Calls all the necessary procedures to start the game
-      ;(clean!)
-      (load-world!)
-      ((wave 'load-wave!))
-      (game-loop))
+    (define (start!)
+      (((environment 'draw) 'draw-start-text))
+      ((((environment 'draw) 'get-window) 'set-key-callback!)
+       (lambda (type key)
+         (if (and (eq? type 'pressed) (eq? key #\s))
+             (clean!)))))
 
     (define (clean!)
-      (display "Clean!")) ;Resets all the environment variables and lists
-
-    (define (stop!)
-      (Display "Stop!")) ;Stops the game
+      ((((environment 'draw) 'get-text-layer) 'remove-drawable!) ((environment 'draw) 'get-start-text))
+      (load-world!)
+      ((environment 'remove-all-objects!))
+      (set! monster-spawn-time 0)
+      (set! monster-move-time 0)
+      ((environment 'set-monsters!) '())
+      ((environment 'set-towers!) '())
+      ((wave 'set-wave!) 0)
+      ((wave 'set-wave-list!) '())
+      ((wave 'load-wave!))
+      (game-loop))
 
     (define (game-loop) ;This starts the game loop
 
@@ -32,7 +40,12 @@
          (if (and (eq? button 'left)
                   (eq? status 'pressed))
              (let ((tower (make-tower (make-position (- x (- (modulo x (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50)))) (- y (- (modulo y (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50))))) environment)))
-               ((environment 'add-entity!) tower))))))
+               ((environment 'add-entity!) tower)))))
+      
+      ((((environment 'draw) 'get-window) 'set-key-callback!)
+       (lambda (type key)
+         (if (and (eq? type 'pressed) (eq? key #\space))
+             (begin (display "Restart") (clean!))))))
   
     (define (load-world!)
       ((environment 'draw) 'draw-world!)) ;Call draw-world! from Draw ADT
@@ -49,7 +62,6 @@
     (define (dispatch mes)
       (cond ((eq? mes 'start!) (start!))
             ((eq? mes 'clean!) clean!)
-            ((eq? mes 'stop!) stop!)
             ((eq? mes 'load-world!) (load-world!))
             (else (display "Error: Wrong dispatch message (Game.rkt): ") (display mes))))
     dispatch))

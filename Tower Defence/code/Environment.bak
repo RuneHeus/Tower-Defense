@@ -35,6 +35,9 @@
                 (cons (car list) (remove (cdr list))))))
       (set! monsters (remove monsters))
       (((draw 'entity-layer) 'remove-drawable!) (monster 'get-tile)))
+
+    (define (find-monster monster)
+      ())
   
     (define (set-new-increment! monster)
       (map (lambda (position)
@@ -100,5 +103,7 @@
             ((eq? mes 'check-tower-areas) check-tower-areas)
             ((eq? mes 'on-path?) on-path?)
             ((eq? mes 'towers-loop) towers-loop)
+            ((eq? mes 'draw-entity!) draw-entity!)
+            ((eq? mes 'find-monster) find-monster)
             (else (display "Error: Wrong dispatch message (Environment.rkt) -> ") (display mes))))
     dispatch))

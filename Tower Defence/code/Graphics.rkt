@@ -4,7 +4,7 @@
 ;;;;*       >>> Graphics.rkt  <<<      *;;;;
 ;;;;* > Programmeerproject 2022-2023 < *;;;;
 ;;;;*                                  *;;;;
-;;;;*         >>  Versie 1  <<         *;;;;
+;;;;*         >>  Versie 3  <<         *;;;;
 ;;;;*                                  *;;;;
 ;;;;*            Adapted by:           *;;;;
 ;;;;*           Bjarno Oeyen           *;;;;
@@ -288,6 +288,8 @@
 ;;;;---------------------------------------------------------------------
 (define (get-bitmap file)
   (let ((bitmap (make-object bitmap% 1 1)))
+    (unless (file-exists? file)
+      (error 'get-bitmap "Cannot load file path: ~a" file))
     (send bitmap load-file file)
     bitmap))
 
@@ -453,14 +455,14 @@
       (define offset-y (+ y (/ h 2)))
       (send dc translate offset-x offset-y)
       (define rotation-r (/ (* rotation pi) 180))
-      (send dc rotate rotation)
+      (send dc rotate rotation-r)
       (send dc set-scale x-scale y-scale)
       (if mask
           (begin (send mask-dc draw-bitmap mask 0 0)
                  (send dc draw-bitmap bufferbitmap (- (/ w 2)) (- (/ h 2)) 'solid transparent-color mask))
           (send dc draw-bitmap bufferbitmap (- (/ w 2)) (- (/ h 2))))
       (send dc set-scale 1 1)
-      (send dc rotate (- rotation))
+      (send dc rotate (- rotation-r))
       (send dc translate (- offset-x) (- offset-y)))
     
     ;; A procedure to set a callback. This callback

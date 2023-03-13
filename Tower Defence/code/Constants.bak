@@ -1,13 +1,12 @@
 (load "Position.rkt")
 
+;UI
+(define width 500) ;width of the window
+(define height 400) ;Height of the window
+
+(define size-factor (exact->inexact (/ width 800)));The grid division of the UI
+
 
 ; Path positions
-(define start-position (make-position 0 100))
-(define end-position (make-position 800 500))
-
-
-;UI
-(define width 800) ;width of the window
-(define height 600) ;Height of the window
-
-(define devision 20) ;The grid division of the UI
+(define start-position (make-position 0 (* 100 size-factor)))
+(define end-position (make-position (* 750 size-factor) (* size-factor 500)))
