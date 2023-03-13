@@ -1,4 +1,4 @@
-(#%require "Graphics.rkt")
+
 (load "Constants.rkt")
 
 (define (make-draw)
