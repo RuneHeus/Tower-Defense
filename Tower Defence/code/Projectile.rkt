@@ -1,4 +1,3 @@
-
 (load "Position.rkt")
 (load "Constants.rkt")
 

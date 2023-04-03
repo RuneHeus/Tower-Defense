@@ -1,4 +1,3 @@
-
 (load "Constants.rkt")
 
 (define (make-monster position)

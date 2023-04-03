@@ -1,10 +1,11 @@
+(#%require "Graphics.rkt")
 (load "Environment.rkt")
 (load "Game.rkt")
 (load "Path.rkt")
 (load "Constants.rkt")
 (load "Draw.rkt")
 (load "Wave.rkt")
-(#%require "Graphics.rkt")
+
 
 ;All the pre initialisation that is needed to start the game
 (define Path (make-path start-position end-position))
