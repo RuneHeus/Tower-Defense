@@ -23,7 +23,7 @@
           (set! area (append area (list (make-position x y)))))))
 
     (define (check-area monster)
-      (if (or (not target) (eq? monster target));Checks if a monster is in its area or not, it there is a monster in the area but the tower already has a target, than this monster will be ignored
+      (if (or (not target) (eq? monster target));Checks if a monster is in its area or not, if there is a monster in the area but the tower already has a target, than this monster will be ignored
           (let* ((x ((monster 'get-position) 'get-x))
                  (y ((monster 'get-position) 'get-y))
                  (monster-pos (make-position (- x (modulo x (* size-factor 50))) (- y (modulo y (* size-factor 50)))))
@@ -42,15 +42,19 @@
     
     (define (shoot!)
       (if target
-          (if (= cooldown 0)
-              (if projectile
-                  ((projectile 'move!))
-                  (begin
-                    (set! projectile (make-projectile (make-position (position 'get-x) (position 'get-y)) target environment))
-                    ((((environment 'draw) 'projectile-layer) 'add-drawable!) (projectile 'get-tile))
-                    (set! cooldown 2000)))
-              (if projectile
-                  ((projectile 'move!))))))
+          (begin 
+            (display target)
+            (if (= cooldown 0)
+                (if projectile
+                    ((projectile 'move!)) ;If projectile exists, move it
+                    (begin
+                      (set-projectile! (make-projectile (make-position (position 'get-x) (position 'get-y)) target dispatch))
+                      ((((environment 'draw) 'projectile-layer) 'add-drawable!) (projectile 'get-tile))
+                      (set! cooldown 2000)))
+                (if projectile
+                    ((projectile 'move!)))))
+          (if projectile
+              ((projectile 'remove-projectile)))))
     
     (define (set-cooldown! num)
       (set! cooldown num))

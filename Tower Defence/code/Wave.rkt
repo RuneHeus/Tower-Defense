@@ -10,7 +10,8 @@
     (if (not (null? wave-list))
         (begin ((environment 'add-entity!) (car wave-list))
                (set! wave-list (cdr wave-list))
-               (set! wave-list (cons (make-monster (make-position (start-position 'get-x) (start-position 'get-y))) wave-list)))))
+               (set! wave-list (cons (make-monster (make-position (start-position 'get-x) (start-position 'get-y))) wave-list))
+               )))
 
   (define (fill-wave-list n)
     (define (iter counter)
@@ -28,7 +29,7 @@
   
   (define (load-wave!)
     (set! wave (+ wave 1))
-    (cond ((= wave 1) (fill-wave-list 5))))
+    (cond ((= wave 1) (fill-wave-list 1))))
   
   (define (dispatch mes)
     (cond ((eq? mes 'next-monster!) next-monster!)

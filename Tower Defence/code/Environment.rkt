@@ -30,14 +30,14 @@
       ((draw 'reposition!) (monster 'get-tile) (monster 'get-position)))
 
     (define (remove-monster! monster)
-      (define (remove list)
+      (define (remove list) ;Iterative searching for monster
         (if (null? list)
             '()
-            (if ((((car list) 'get-position) 'equal?) (monster 'get-position))
-                (remove (cdr list))
-                (cons (car list) (remove (cdr list))))))
-      (set! monsters (remove monsters))
-      (((draw 'entity-layer) 'remove-drawable!) (monster 'get-tile))
+            (if (equal? (car list) monster) ;If object is equal to monster
+                (remove (cdr list)); leave it out of the list
+                (cons (car list) (remove (cdr list)))))) ;Move on with next monster
+      (set-monsters! (remove monsters))
+      (((draw 'entity-layer) 'remove-drawable!) (monster 'get-tile)) ;Remove monster drawable from screen
       (map (lambda (tower)
              ((tower 'remove-target) monster)) towers))
 
@@ -107,17 +107,6 @@
 
     (define (set-towers! val)
       (set! towers val))
-
-    (define (find-tower-by-projectile proj-position)
-      (define (iter lijst)
-        (if (not (null? lijst))
-            (if ((car lijst) 'get-projectile)
-                (if (((((car lijst) 'get-projectile) 'get-position) 'equal?) proj-position)
-                           (car lijst)
-                    (iter (cdr lijst)))
-                (iter (cdr lijst)))
-            '()))
-      (iter towers))
 
     (define (towers-shoot tower)
       ((tower 'shoot!)))
