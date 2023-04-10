@@ -30,14 +30,14 @@
       ((draw 'reposition!) (monster 'get-tile) (monster 'get-position)))
 
     (define (remove-monster! monster)
-      (define (remove list)
+      (define (remove list) ;Iterative searching for monster
         (if (null? list)
             '()
-            (if ((((car list) 'get-position) 'equal?) (monster 'get-position))
-                (remove (cdr list))
-                (cons (car list) (remove (cdr list))))))
-      (set! monsters (remove monsters))
-      (((draw 'entity-layer) 'remove-drawable!) (monster 'get-tile))
+            (if (equal? (car list) monster) ;If object is equal to monster
+                (remove (cdr list)); leave it out of the list
+                (cons (car list) (remove (cdr list)))))) ;Move on with next monster
+      (set-monsters! (remove monsters))
+      (((draw 'entity-layer) 'remove-drawable!) (monster 'get-tile)) ;Remove monster drawable from screen
       (map (lambda (tower)
              ((tower 'remove-target) monster)) towers))
 
@@ -69,7 +69,7 @@
       (map (lambda (position)
              (if ((monster 'endpoint?))
                  (remove-monster! monster)
-                 (if (((monster 'get-position) 'in-area?) (car position))
+                 (if (((monster 'get-position) close-enough?) (car position))
                      ((monster 'set-increment!) ((cdr position) 'get-x) ((cdr position) 'get-y)))))
            (path 'path-positions)))
   

@@ -1,30 +1,27 @@
 (load "Constants.rkt")
 
 (define (make-monster position)
-
   (let ((tile (make-tile 50 50 "../images/Monsters/monster1.png"))
          (health 1)
-         (increment-x 0)
-         (increment-y 0))
+         (angle 0))
   
     (define (set-scale!)
       ((tile 'set-scale!) size-factor)
 
       ((tile 'set-x!) (+ (- (/ (* (tile 'get-w) size-factor) 2) (/ (tile 'get-w) 2)) (position 'get-x)))
       ((tile 'set-y!) (+ (- (/ (* (tile 'get-h) size-factor) 2) (/ (tile 'get-h) 2)) (position 'get-y))))
- 
-    (define (set-increment! x y)
-      (set! increment-x x)
-      (set! increment-y y))
 
     (define (endpoint?)
-      ((position 'equal?) end-position))
+      ((position 'close-enough?) end-position))
 
     (define (set-next-position!)
-      ((position 'change-coordinates!) (+ (position 'get-x) increment-x) (+ (position 'get-y) increment-y)))
+      ((position 'change-coordinates!) (+ (position 'get-x) (* 2 (cos angle))) (+ (position 'get-y) (* 2 (sin angle)))))
 
     (define (hit!)
       (set! health (- health 1)))
+
+    (define (set-angle! value)
+      (set! angle value))
   
     (define (dispatch mes)
       (cond ((eq? mes 'get-position) position)
@@ -36,6 +33,7 @@
             ((eq? mes 'entity?) 'monster)
             ((eq? mes 'set-next-position!) (set-next-position!))
             ((eq? mes 'get-health) health)
+            ((eq? mes 'set-angle!) set-angle!)
             ((eq? mes 'hit!) hit!)))
     (set-scale!)
     dispatch))

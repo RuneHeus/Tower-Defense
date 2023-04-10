@@ -1,7 +1,6 @@
-
 (load "Constants.rkt")
 
-(define (make-monster position)
+(define (make-monster type position)
 
   (let ((tile (make-tile 50 50 "../images/Monsters/monster1.png"))
          (health 1)

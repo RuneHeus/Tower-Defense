@@ -26,12 +26,12 @@
       (or (> x area-pos-x) (> y area-pos-y) (< x 0) (< y 0)))
 
     (define (dispatch mes)
-      (cond ((eq? mes 'get-x) x);
-            ((eq? mes 'get-y) y);
-            ((eq? mes 'set-x!) set-x!);
-            ((eq? mes 'set-y!) set-y!);
-            ((eq? mes 'equal?) equal?);
-            ((eq? mes 'change-coordinates!) change-coordinates!);
+      (cond ((eq? mes 'get-x) x)
+            ((eq? mes 'get-y) y)
+            ((eq? mes 'set-x!) set-x!)
+            ((eq? mes 'set-y!) set-y!)
+            ((eq? mes 'equal?) equal?)
+            ((eq? mes 'change-coordinates!) change-coordinates!)
             ((eq? mes 'in-area?) in-area?)
             ((eq? mes 'close-enough?) close-enough?)
             ((eq? mes 'outside-playarea?) outside-playarea?)

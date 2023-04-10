@@ -3,10 +3,10 @@
 
 (define (make-path start-position end-position)
 
-  (let* ((start (cons start-position (make-position (* size-factor 2) 0)))
-         (path1 (cons (make-position (* size-factor 300) (* size-factor 100)) (make-position 0 (* size-factor 2))))
-         (path2 (cons (make-position (* size-factor 300) (* size-factor 500)) (make-position (* size-factor 2) 0)))
-         (end (cons end-position (make-position 0 0))))
+  (let* ((start start-position)
+         (path1 (make-position (* size-factor 300) (* size-factor 100)))
+         (path2 (make-position (* size-factor 300) (* size-factor 500)))
+         (end end-position))
     (define path-positions (list start path1 path2 end))
   
     (define (endpoint? monster)
