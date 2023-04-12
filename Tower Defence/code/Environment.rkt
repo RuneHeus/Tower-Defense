@@ -71,18 +71,30 @@
           (if ((monster 'endpoint?))
               (remove-monster! monster)
               (if (not (null? paths))
-                  (if ((monster-pos 'close-enough?) (car paths))
+                  (if ((monster-pos 'equal?) (car paths))
                       ((monster 'set-angle!) (atan (- ((cadr paths) 'get-y) (monster-pos 'get-y)) (- ((cadr paths) 'get-x) (monster-pos 'get-x))))
-                      (loop (cdr paths))))))
+                      (if (next-pos-to-far? monster paths)
+                          (begin 
+                            ((monster 'set-position!) (car paths))
+                            (newline)
+                            (display "Changing position")
+                            #false)
+                          (loop (cdr paths)))))))
         (loop (path 'path-positions))))
+
+    (define (next-pos-to-far? monster paths);If the increment for the next position is greater than the position of the path, then the code wont recognize that he passed that position, so with this code it fixes that
+      (if (not (null? (cdr paths)))
+          (or (> (+ ((monster 'get-position) 'get-x) (round (* (monster 'get-speed) (cos (monster 'get-angle))))) ((car paths) 'get-x))
+              (> (+ ((monster 'get-position) 'get-y) (round (* (monster 'get-speed) (sin (monster 'get-angle))))) ((car paths) 'get-y)))
+          #false))
   
     (define (monsters-loop)
       (map (lambda (monster)
              (if (<= (monster 'get-health) 0)
                  (remove-monster! monster)
                  (begin
-                   (set-new-increment! monster) ;Calculates the way it has to move
-                   (move-monster! monster))))
+                   (if (set-new-increment! monster) ;Calculates the way it has to move
+                       (begin (display "Move monster") (move-monster! monster))))))
            monsters))
 
     (define (free-position? tower)

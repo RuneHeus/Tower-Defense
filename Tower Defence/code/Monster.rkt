@@ -1,9 +1,17 @@
 (load "Constants.rkt")
 
-(define (make-monster position)
-  (let ((tile (make-tile 50 50 "../images/Monsters/monster1.png"))
+(define (make-monster type position)
+  (let ((tile (make-tile 50 50 "../images/Monsters/red-monster.png" "../images/Monsters/red-monster_mask.png"))
          (health 1)
-         (angle 0))
+         (angle 0)
+         (speed 1))
+    
+  (case type ;If red is chosen then no option is selected, then we use the default values
+    ("Blue" (begin
+              (set! health 3)
+              (set! speed health)
+              (set! tile (make-tile 50 50 "../images/Monsters/blue-monster.png" "../images/Monsters/blue-monster_mask.png")))))
+  
   
     (define (set-scale!)
       ((tile 'set-scale!) size-factor)
@@ -15,16 +23,25 @@
       ((position 'close-enough?) end-position))
 
     (define (set-next-position!)
-      ((position 'change-coordinates!) (+ (position 'get-x) (* 2 (cos angle))) (+ (position 'get-y) (* 2 (sin angle)))))
+      (newline)
+      (display "X: ")
+      (display (position 'get-x))
+      (display ", Y: ")
+      (display (position 'get-y))
+      ((position 'change-coordinates!) (+ (position 'get-x) (round (* speed (cos angle)))) (+ (position 'get-y) (round (* speed (sin angle))))))
 
     (define (hit!)
       (set! health (- health 1)))
 
     (define (set-angle! value)
       (set! angle value))
+
+    (define (set-position! pos)
+      (set! position pos))
   
     (define (dispatch mes)
       (cond ((eq? mes 'get-position) position)
+            ((eq? mes 'set-position!) set-position!)
             ((eq? mes 'get-tile) tile)
             ((eq? mes 'get-increment-x) increment-x)
             ((eq? mes 'get-increment-y) increment-y)
@@ -34,6 +51,8 @@
             ((eq? mes 'set-next-position!) (set-next-position!))
             ((eq? mes 'get-health) health)
             ((eq? mes 'set-angle!) set-angle!)
+            ((eq? mes 'get-angle) angle)
+            ((eq? mes 'get-speed) speed)
             ((eq? mes 'hit!) hit!)))
     (set-scale!)
     dispatch))

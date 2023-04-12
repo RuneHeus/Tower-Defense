@@ -43,7 +43,6 @@
     (define (shoot!)
       (if target
           (begin 
-            (display target)
             (if (= cooldown 0)
                 (if projectile
                     ((projectile 'move!)) ;If projectile exists, move it

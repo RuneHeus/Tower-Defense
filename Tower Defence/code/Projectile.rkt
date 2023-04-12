@@ -22,11 +22,6 @@
 
     (define (move!)
       (calculate-move!)
-      ;      (display "Projectile pos: ")
-      ;      (display (position 'get-x))
-      ;      (display ", ")
-      ;      (display (position 'get-y))
-      ;      (newline)
       (if (not (null? (target 'get-position)))
           (if ((position 'close-enough?) (target 'get-position))
               (begin
@@ -35,21 +30,8 @@
               (if ((position 'outside-playarea?) width height)
                   (remove-projectile)
                   (begin
-;                    (display "-----------Projectile----------")
-;                    (newline)
-;                    (display "Projectile pos: ")
-;                    (display (position 'get-x))
-;                    (display ", ")
-;                    (display (position 'get-y))
-;                    (newline)
                     ((position 'change-coordinates!) (+ (position 'get-x) (* 6 (cos angle))) (+ (position 'get-y) (* 6 (sin angle))))
                     (((environment 'draw) 'reposition!) tile position)
-;                    (display angle)
-;                    (newline)                    
-;                    (display "Projectile pos: ")
-;                    (display (position 'get-x))
-;                    (display ", ")
-;                    (display (position 'get-y))
                     (newline))))))
     
     (define (remove-projectile)
