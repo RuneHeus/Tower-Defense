@@ -4,7 +4,8 @@
   (let ((tile (make-tile 50 50 "../images/Monsters/red-monster.png" "../images/Monsters/red-monster_mask.png"))
          (health 1)
          (angle 0)
-         (speed 1))
+         (speed 1)
+         (last-path-position '()))
     
   (case type ;If red is chosen then no option is selected, then we use the default values
     ("Blue" (begin
@@ -23,11 +24,6 @@
       ((position 'close-enough?) end-position))
 
     (define (set-next-position!)
-      (newline)
-      (display "X: ")
-      (display (position 'get-x))
-      (display ", Y: ")
-      (display (position 'get-y))
       ((position 'change-coordinates!) (+ (position 'get-x) (round (* speed (cos angle)))) (+ (position 'get-y) (round (* speed (sin angle))))))
 
     (define (hit!)
@@ -38,6 +34,9 @@
 
     (define (set-position! pos)
       (set! position pos))
+
+    (define (set-last-path-position! position)
+      (set! last-path-position position))
   
     (define (dispatch mes)
       (cond ((eq? mes 'get-position) position)
@@ -53,6 +52,8 @@
             ((eq? mes 'set-angle!) set-angle!)
             ((eq? mes 'get-angle) angle)
             ((eq? mes 'get-speed) speed)
-            ((eq? mes 'hit!) hit!)))
+            ((eq? mes 'hit!) hit!)
+            ((eq? mes 'set-last-path-position!) set-last-path-position!)
+            ((eq? mes 'get-last-path-position) last-path-position)))
     (set-scale!)
     dispatch))

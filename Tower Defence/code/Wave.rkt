@@ -16,7 +16,7 @@
   (define (fill-wave-list n)
     (define (iter counter)
       (if (not (= counter n))
-          (let ((monster (make-monster "Blue" (make-position (start-position 'get-x) (start-position 'get-y)))))
+          (let ((monster (make-monster "Red" (make-position (start-position 'get-x) (start-position 'get-y)))))
             (set! wave-list (append wave-list (list monster)))
             (iter (+ counter 1)))))
     (iter 0))
