@@ -1,3 +1,4 @@
+(#%require (only racket/base random))
 (load "Constants.rkt")
 
 (define (make-monster type position)
@@ -5,13 +6,39 @@
          (health 1)
          (angle 0)
          (speed 1)
-         (last-path-position '()))
+         (last-path-position '())
+         (on-hit '())
+         (random-event '())
+         (on-death '()))
     
-  (case type ;If red is chosen then no option is selected, then we use the default values
-    ("Blue" (begin
-              (set! health 3)
-              (set! speed health)
-              (set! tile (make-tile 50 50 "../images/Monsters/blue-monster.png" "../images/Monsters/blue-monster_mask.png")))))
+    (case type ;If red is chosen then no option is selected, then we use the default values
+      ("Blue" (begin
+                (set! health 3)
+                (set! speed health)
+                (set! tile (make-tile 50 50 "../images/Monsters/blue-monster.png" "../images/Monsters/blue-monster_mask.png"))
+                (set! on-hit (lambda () (if (eq? health 1)
+                                            (set! speed 1))))))
+    
+      ("Gray" (begin
+                (set! health 3)
+                (set! tile (make-tile 50 50 "../images/Monsters/gray-monster.png" "../images/Monsters/gray-monster_mask.png"))
+                (set! random-event (lambda ()
+                                     (cond ((eq? speed 1) (set! speed (+ speed (random 0 3))))
+                                           ((eq? speed 3) (set! speed (+ speed (random -2 1))))
+                                           (else (set! speed (+ speed (random -1 2)))))))))
+      
+      ("Purple" (begin
+                  (set! health 1)
+                  (set! tile (make-tile 50 50 "../images/Monsters/purple-monster.png" "../images/Monsters/purple-monster_mask.png"))
+                  (set! on-death (lambda (monsters next-pos)
+                                   (map (lambda (monster)
+                                          (if (not (equal? (monster 'get-type) "Purple"))
+                                              (if (and (>= ((monster 'get-position) 'get-x) (last-path-position 'get-x))
+                                                       (<= ((monster 'get-position) 'get-x) (next-pos 'get-x))
+                                                       (>= ((monster 'get-position) 'get-y) (last-path-position 'get-y))
+                                                       (<= ((monster 'get-position) 'get-y) (next-pos 'get-y)))
+                                                  ((monster 'set-health!) (+ (monster 'get-health) 1)))))
+                                        monsters))))))
   
   
     (define (set-scale!)
@@ -24,10 +51,21 @@
       ((position 'close-enough?) end-position))
 
     (define (set-next-position!)
+;      (display "------")
+;      (display type)
+;      (display "------")
+;      (newline)
+;      (display "Health: ")
+;      (display health)
+;      (newline)
+;      (display "----------------")
+;      (newline)
       ((position 'change-coordinates!) (+ (position 'get-x) (round (* speed (cos angle)))) (+ (position 'get-y) (round (* speed (sin angle))))))
 
     (define (hit!)
-      (set! health (- health 1)))
+      (set! health (- health 1))
+      (if (not (null? on-hit))
+          (on-hit)))
 
     (define (set-angle! value)
       (set! angle value))
@@ -37,6 +75,9 @@
 
     (define (set-last-path-position! position)
       (set! last-path-position position))
+
+    (define (set-health! value)
+      (set! health value))
   
     (define (dispatch mes)
       (cond ((eq? mes 'get-position) position)
@@ -54,6 +95,10 @@
             ((eq? mes 'get-speed) speed)
             ((eq? mes 'hit!) hit!)
             ((eq? mes 'set-last-path-position!) set-last-path-position!)
-            ((eq? mes 'get-last-path-position) last-path-position)))
+            ((eq? mes 'get-last-path-position) last-path-position)
+            ((eq? mes 'get-random-event) random-event)
+            ((eq? mes 'on-death) on-death)
+            ((eq? mes 'set-health!) set-health!)
+            ((eq? mes 'get-type) type)))
     (set-scale!)
     dispatch))

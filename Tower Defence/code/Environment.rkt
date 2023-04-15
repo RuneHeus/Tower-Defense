@@ -1,3 +1,4 @@
+(#%require (only racket/base sleep))
 (load "Monster.rkt")
 
 (define (make-environment draw path)
@@ -105,10 +106,15 @@
     (define (monsters-loop)
       (map (lambda (monster)
              (if (<= (monster 'get-health) 0)
-                 (remove-monster! monster)
+                 (begin
+                   (case (monster 'get-type)
+                     ("Purple" ((monster 'on-death) monsters (next-pos-path monster)))
+                     ("Gray" (add-entity! (make-monster "Red" (make-position (start-position 'get-x) (start-position 'get-y))))
+                             (add-entity! (make-monster "Red" (make-position (start-position 'get-x) (start-position 'get-y))))))
+                   (remove-monster! monster))
                  (begin
                    (if (set-new-increment! monster) ;Calculates the way it has to move
-                        (move-monster! monster)))))
+                       (move-monster! monster)))))
            monsters))
 
     (define (free-position? tower)
@@ -150,6 +156,11 @@
           (if (> 0 (- (tower 'cooldown) ms))
               ((tower 'set-cooldown!) 0)
               ((tower 'set-cooldown!) (- (tower 'cooldown) ms)))))
+
+    (define (monster-random-event)
+      (map (lambda (x)
+             (if (not (null? (x 'get-random-event)))
+                 (begin (display (x 'get-speed)) ((x 'get-random-event))))) monsters))
   
     (define (dispatch mes)
       (cond ((eq? mes 'draw) draw)
@@ -165,5 +176,6 @@
             ((eq? mes 'draw-entity!) draw-entity!)
             ((eq? mes 'find-tower-by-projectile) find-tower-by-projectile)
             ((eq? mes 'remove-all-objects!) remove-all-objects!)
+            ((eq? mes 'monster-random-event) monster-random-event)
             (else (display "Error: Wrong dispatch message (Environment.rkt) -> ") (display mes))))
     dispatch))

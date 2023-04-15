@@ -53,8 +53,7 @@
     (define (time-handler ms)
       (if (>= monster-spawn-time 1000)
           (begin (set! monster-spawn-time 0)
-                 ((wave 'next-monster!))
-                 ((environment 'monster-random-event))))
+                 ((wave 'next-monster!))))
       (if (>= monster-move-time 10) ;Only move monster each 10 ms, so that it runs sort of even on every computer
           (begin (set! monster-move-time 0)
                  ((environment 'monsters-loop))
