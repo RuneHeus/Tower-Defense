@@ -1,5 +1,4 @@
 (load "Position.rkt")
-(load "Constants.rkt")
 
 (define (make-path start-position end-position)
 

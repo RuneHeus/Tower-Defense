@@ -1,11 +1,11 @@
 (#%require (only racket/base random))
-(load "Constants.rkt")
 
 (define (make-monster type position)
-  (let ((tile (make-tile 50 50 "../images/Monsters/red-monster.png" "../images/Monsters/red-monster_mask.png"))
+  (let ((tile (make-tile image-size image-size red-monster-img red-monster-mask))
          (health 1)
          (angle 0)
          (speed 1)
+         (damage 1)
          (last-path-position '())
          (on-hit '())
          (random-event '())
@@ -15,13 +15,15 @@
       ("Blue" (begin
                 (set! health 3)
                 (set! speed health)
-                (set! tile (make-tile 50 50 "../images/Monsters/blue-monster.png" "../images/Monsters/blue-monster_mask.png"))
+                (set! damage 2)
+                (set! tile (make-tile image-size image-size blue-monster-img blue-monster-mask))
                 (set! on-hit (lambda () (if (eq? health 1)
                                             (set! speed 1))))))
     
       ("Gray" (begin
                 (set! health 3)
-                (set! tile (make-tile 50 50 "../images/Monsters/gray-monster.png" "../images/Monsters/gray-monster_mask.png"))
+                (set! damage 2)
+                (set! tile (make-tile image-size image-size gray-monster-img gray-monster-mask))
                 (set! random-event (lambda ()
                                      (cond ((eq? speed 1) (set! speed (+ speed (random 0 3))))
                                            ((eq? speed 3) (set! speed (+ speed (random -2 1))))
@@ -29,7 +31,8 @@
       
       ("Purple" (begin
                   (set! health 1)
-                  (set! tile (make-tile 50 50 "../images/Monsters/purple-monster.png" "../images/Monsters/purple-monster_mask.png"))
+                  (set! damage 3)
+                  (set! tile (make-tile image-size image-size purple-monster-img purple-monster-mask))
                   (set! on-death (lambda (monsters next-pos)
                                    (map (lambda (monster)
                                           (if (not (equal? (monster 'get-type) "Purple"))
@@ -51,19 +54,10 @@
       ((position 'close-enough?) end-position))
 
     (define (set-next-position!)
-;      (display "------")
-;      (display type)
-;      (display "------")
-;      (newline)
-;      (display "Health: ")
-;      (display health)
-;      (newline)
-;      (display "----------------")
-;      (newline)
-      ((position 'change-coordinates!) (+ (position 'get-x) (round (* speed (cos angle)))) (+ (position 'get-y) (round (* speed (sin angle))))))
+      ((position 'change-coordinates!) (+ (position 'get-x) (* speed (cos angle))) (+ (position 'get-y) (* speed (sin angle)))))
 
-    (define (hit!)
-      (set! health (- health 1))
+    (define (hit! damage)
+      (set-health! (- health damage))
       (if (not (null? on-hit))
           (on-hit)))
 
@@ -78,7 +72,10 @@
 
     (define (set-health! value)
       (set! health value))
-  
+
+    (define (set-speed! value)
+      (set! speed value))
+    
     (define (dispatch mes)
       (cond ((eq? mes 'get-position) position)
             ((eq? mes 'set-position!) set-position!)
@@ -99,6 +96,8 @@
             ((eq? mes 'get-random-event) random-event)
             ((eq? mes 'on-death) on-death)
             ((eq? mes 'set-health!) set-health!)
-            ((eq? mes 'get-type) type)))
+            ((eq? mes 'get-type) type)
+            ((eq? mes 'get-damage) damage)
+            ((eq? mes 'set-speed!) set-speed!)))
     (set-scale!)
     dispatch))

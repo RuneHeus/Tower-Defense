@@ -1,8 +1,7 @@
-(load "Constants.rkt")
 (load "Tower.rkt")
 (load "Monster.rkt")
 
-(define (make-game environment wave)
+(define (make-game environment wave player)
 
   (let ((monster-spawn-time 0)
          (monster-move-time 0))
@@ -28,7 +27,6 @@
       (game-loop))
 
     (define (game-loop) ;This starts the game loop
-
       ((((environment 'draw) 'get-window) 'set-update-callback!)
        (lambda (ms)
          (set! monster-spawn-time (+ monster-spawn-time ms))
@@ -39,7 +37,7 @@
        (lambda (button status x y)
          (if (and (eq? button 'left)
                   (eq? status 'pressed))
-             (let ((tower (make-tower (make-position (- x (- (modulo x (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50)))) (- y (- (modulo y (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50))))) environment)))
+             (let ((tower (make-tower 4 (make-position (- x (- (modulo x (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50)))) (- y (- (modulo y (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50))))) environment)))
                ((environment 'add-entity!) tower)))))
       
       ((((environment 'draw) 'get-window) 'set-key-callback!)

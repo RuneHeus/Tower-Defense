@@ -1,20 +1,10 @@
 (load "Position.rkt")
+(load "Constants.rkt")
 
-(define (make-projectile type position target tower)
-  
-  (let ((tile (make-tile projectile-image-size projectile-image-size standard-projectile-img standard-projectile-mask))
+(define (make-projectile position target tower)
+  (let ((tile (make-tile 25 25 "../images/Projectiles/projectile.png" "../images/Projectiles/projectile_mask.png"))
         (target-pos (make-position ((target 'get-position) 'get-x) ((target 'get-position) 'get-y)))
-        (angle 0)
-        (damage 1)
-        (behaviour '()))
-
-
-    (case type
-      ("net" (begin
-               (set! tile (make-tile net-image-size net-image-size net-projectile-img net-projectile-mask))
-               (set! damage 0)
-               (set! behaviour (lambda (monster)
-                                 ((monster 'set-speed!) (/ (monster 'get-speed) 2)))))))
+        (angle 0))
 
     (define (set-scale) ;This sets the scale of projectile
       ((tile 'set-scale!) size-factor)
@@ -35,12 +25,7 @@
       (if (not (null? (target 'get-position)))
           (if ((position 'close-enough?) (target 'get-position))
               (begin
-                ((target 'hit!) damage)
-                (display (target 'get-speed))
-                (newline)
-                (behaviour target)
-                (display (target 'get-speed))
-                (newline)
+                ((target 'hit!))
                 (remove-projectile))
               (if ((position 'outside-playarea?) width height)
                   (remove-projectile)
@@ -58,7 +43,6 @@
             ((eq? mes 'get-position) position)
             ((eq? mes 'move!) move!)
             ((eq? mes 'remove-projectile) remove-projectile)
-            ((eq? mes 'get-behaviour) behaviour)
             (else (display "Error: Wrong dispatch message (Projectile.rkt) -> ") (display mes))))
     (set-scale)
     (move!)

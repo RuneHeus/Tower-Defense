@@ -1,5 +1,3 @@
-(load "Constants.rkt")
-
 (define (make-wave environment)
 
   (define wave 0)
@@ -16,7 +14,7 @@
   (define (fill-wave-list n)
     (define (iter counter)
       (if (not (= counter n))
-          (let ((monster1 (make-monster "Gray" (make-position (start-position 'get-x) (start-position 'get-y))))
+          (let ((monster1 (make-monster "Red" (make-position (start-position 'get-x) (start-position 'get-y))))
                 (monster2 (make-monster "Red" (make-position (start-position 'get-x) (start-position 'get-y)))))
             (set! wave-list (append wave-list (list monster1 monster2)))
             (iter (+ counter 1)))))

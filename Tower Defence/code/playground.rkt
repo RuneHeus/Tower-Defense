@@ -1,3 +1,3 @@
-(#%require racket/gui)
+(#%require "Graphics.rkt")
 
-(sleep/yield 0.5)
+(generate-mask "../images/Projectiles/net.png" "white")

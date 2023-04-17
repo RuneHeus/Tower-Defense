@@ -1,7 +1,6 @@
 (#%require (only racket/base sleep))
-(load "Monster.rkt")
 
-(define (make-environment draw path)
+(define (make-environment draw path player)
 
   (let ((monsters '())
          (towers '()))
@@ -30,7 +29,9 @@
       (monster 'set-next-position!)
       ((draw 'reposition!) (monster 'get-tile) (monster 'get-position)))
 
-    (define (remove-monster! monster)
+    (define (remove-monster! monster reason)
+      (if (eq? reason "End")
+          ((player 'damage!) monster))
       (define (remove list) ;Iterative searching for monster
         (if (null? list)
             '()
@@ -72,7 +73,7 @@
             (next-pos (next-pos-path monster)))
         (define (loop paths)
           (if ((monster 'endpoint?))
-              (remove-monster! monster)
+              (remove-monster! monster "End")
               (if (not (null? paths))
                   (begin
                     (if ((monster-pos 'equal?) (car paths))
@@ -111,7 +112,7 @@
                      ("Purple" ((monster 'on-death) monsters (next-pos-path monster)))
                      ("Gray" (add-entity! (make-monster "Red" (make-position (start-position 'get-x) (start-position 'get-y))))
                              (add-entity! (make-monster "Red" (make-position (start-position 'get-x) (start-position 'get-y))))))
-                   (remove-monster! monster))
+                   (remove-monster! monster "Death"))
                  (begin
                    (if (set-new-increment! monster) ;Calculates the way it has to move
                        (move-monster! monster)))))
@@ -158,9 +159,9 @@
               ((tower 'set-cooldown!) (- (tower 'cooldown) ms)))))
 
     (define (monster-random-event)
-      (map (lambda (x)
-             (if (not (null? (x 'get-random-event)))
-                 (begin (display (x 'get-speed)) ((x 'get-random-event))))) monsters))
+      (map (lambda (monster)
+             (if (not (null? (monster 'get-random-event)))
+                 ((monster 'get-random-event)))) monsters))
   
     (define (dispatch mes)
       (cond ((eq? mes 'draw) draw)

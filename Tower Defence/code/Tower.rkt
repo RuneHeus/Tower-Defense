@@ -2,13 +2,21 @@
 (load "Position.rkt")
 (load "Projectile.rkt")
 
-(define (make-tower position environment)
+(define (make-tower type position environment)
 
-  (let ((tile (make-tile 50 50 "../images/Towers/tower1.png" "../images/Towers/tower1_mask.png"))
+  (let ((tile (make-tile image-size image-size standard-tower-img standard-tower-mask))
         (area '())
         (cooldown 0)
+        (cooldown-time 2000)
         (target #f)
-        (projectile #f))
+        (projectile #f)
+        (projectile-type '()))
+
+    (case type 
+      (4 (begin
+           (set! tile (make-tile image-size image-size net-tower-img net-tower-mask))
+           (set! projectile-type "net")
+           (set! cooldown-time 5000))))
   
     (define (set-scale) ;This sets the scale of the tower
       ((tile 'set-scale!) size-factor)
@@ -47,9 +55,9 @@
                 (if projectile
                     ((projectile 'move!)) ;If projectile exists, move it
                     (begin
-                      (set-projectile! (make-projectile (make-position (position 'get-x) (position 'get-y)) target dispatch))
+                      (set-projectile! (make-projectile projectile-type (make-position (position 'get-x) (position 'get-y)) target dispatch))
                       ((((environment 'draw) 'projectile-layer) 'add-drawable!) (projectile 'get-tile))
-                      (set! cooldown 2000)))
+                      (set! cooldown cooldown-time)))
                 (if projectile
                     ((projectile 'move!)))))
           (if projectile
