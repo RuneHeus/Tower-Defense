@@ -16,7 +16,7 @@
       (4 (begin
            (set! tile (make-tile image-size image-size net-tower-img net-tower-mask))
            (set! projectile-type "net")
-           (set! cooldown-time 5000))))
+           (set! cooldown-time 3000))))
   
     (define (set-scale) ;This sets the scale of the tower
       ((tile 'set-scale!) size-factor)

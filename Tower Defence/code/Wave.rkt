@@ -8,7 +8,7 @@
     (if (not (null? wave-list))
         (begin ((environment 'add-entity!) (car wave-list))
                (set! wave-list (cdr wave-list))
-               ;(set! wave-list (cons (make-monster "Blue" (make-position (start-position 'get-x) (start-position 'get-y))) wave-list))
+               (set! wave-list (cons (make-monster "Blue" (make-position (start-position 'get-x) (start-position 'get-y))) wave-list))
                )))
 
   (define (fill-wave-list n)

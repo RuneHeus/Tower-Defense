@@ -55,7 +55,7 @@
                  ((environment 'monster-random-event))))
       (if (>= monster-move-time 10) ;Only move monster each 10 ms, so that it runs sort of even on every computer
           (begin (set! monster-move-time 0)
-                 ((environment 'monsters-loop))
+                 ((environment 'monsters-loop) ms)
                  ((environment 'towers-loop) ms))))
   
     (define (dispatch mes)

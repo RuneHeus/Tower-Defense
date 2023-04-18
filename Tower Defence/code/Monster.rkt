@@ -4,17 +4,20 @@
   (let ((tile (make-tile image-size image-size red-monster-img red-monster-mask))
          (health 1)
          (angle 0)
-         (speed 1)
+         (speed 2)
+         (default-speed 2)
          (damage 1)
          (last-path-position '())
          (on-hit '())
          (random-event '())
-         (on-death '()))
+         (on-death '())
+         (infection 0))
     
     (case type ;If red is chosen then no option is selected, then we use the default values
       ("Blue" (begin
                 (set! health 3)
                 (set! speed health)
+                (set! default-speed 3)
                 (set! damage 2)
                 (set! tile (make-tile image-size image-size blue-monster-img blue-monster-mask))
                 (set! on-hit (lambda () (if (eq? health 1)
@@ -54,7 +57,7 @@
       ((position 'close-enough?) end-position))
 
     (define (set-next-position!)
-      ((position 'change-coordinates!) (+ (position 'get-x) (* speed (cos angle))) (+ (position 'get-y) (* speed (sin angle)))))
+      ((position 'change-coordinates!) (round (+ (position 'get-x) (* speed (cos angle)))) (round (+ (position 'get-y) (* speed (sin angle))))))
 
     (define (hit! damage)
       (set-health! (- health damage))
@@ -75,6 +78,9 @@
 
     (define (set-speed! value)
       (set! speed value))
+
+    (define (set-infection! value)
+      (set! infection value))
     
     (define (dispatch mes)
       (cond ((eq? mes 'get-position) position)
@@ -98,6 +104,9 @@
             ((eq? mes 'set-health!) set-health!)
             ((eq? mes 'get-type) type)
             ((eq? mes 'get-damage) damage)
-            ((eq? mes 'set-speed!) set-speed!)))
+            ((eq? mes 'set-speed!) set-speed!)
+            ((eq? mes 'set-infection) set-infection!)
+            ((eq? mes 'get-infection) infection)
+            ((eq? mes 'get-default-speed) default-speed)))
     (set-scale!)
     dispatch))

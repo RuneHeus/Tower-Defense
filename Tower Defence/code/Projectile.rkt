@@ -6,6 +6,8 @@
         (target-pos (make-position ((target 'get-position) 'get-x) ((target 'get-position) 'get-y)))
         (angle 0)
         (damage 1)
+        (cooldown 3000)
+        (move? #t)
         (behaviour '()))
 
 
@@ -14,7 +16,8 @@
                (set! tile (make-tile net-image-size net-image-size net-projectile-img net-projectile-mask))
                (set! damage 0)
                (set! behaviour (lambda (monster)
-                                 ((monster 'set-speed!) (/ (monster 'get-speed) 2)))))))
+                                 ((monster 'set-speed!) (/ (monster 'get-speed) 2))
+                                 ((monster 'set-infection) infection-duration))))))
 
     (define (set-scale) ;This sets the scale of projectile
       ((tile 'set-scale!) size-factor)
@@ -31,27 +34,30 @@
         (set! angle (atan calculated-y calculated-x))))
 
     (define (move!)
-      (calculate-move!)
-      (if (not (null? (target 'get-position)))
-          (if ((position 'close-enough?) (target 'get-position))
-              (begin
-                ((target 'hit!) damage)
-                (display (target 'get-speed))
-                (newline)
-                (behaviour target)
-                (display (target 'get-speed))
-                (newline)
-                (remove-projectile))
-              (if ((position 'outside-playarea?) width height)
-                  (remove-projectile)
-                  (begin
-                    ((position 'change-coordinates!) (+ (position 'get-x) (* 6 (cos angle))) (+ (position 'get-y) (* 6 (sin angle))))
-                    (((environment 'draw) 'reposition!) tile position)
-                    (newline))))))
+      (if move?
+          (begin (calculate-move!)
+                 (if (not (null? (target 'get-position)))
+                     (if ((position 'close-enough?) (target 'get-position))
+                         (if (= (target 'get-infection) 0)
+                             (begin
+                               ((target 'hit!) damage)
+                               (behaviour target)
+                               (set! move? #f)
+                               ((target 'set-infection) 5000)
+                               (if (<= cooldown 0)
+                                   (remove-projectile))))
+                         (if ((position 'outside-playarea?) width height)
+                             (remove-projectile)
+                             (begin
+                               ((position 'change-coordinates!) (+ (position 'get-x) (* 6 (cos angle))) (+ (position 'get-y) (* 6 (sin angle))))
+                               (((environment 'draw) 'reposition!) tile position))))))))
     
     (define (remove-projectile)
       ((((environment 'draw) 'projectile-layer) 'remove-drawable!) tile)
       ((tower 'set-projectile!) #f))
+
+    (define (minus-cooldown value)
+      (set! cooldown (- cooldown value)))
     
     (define (dispatch mes)
       (cond ((eq? mes 'get-tile) tile)
@@ -59,7 +65,9 @@
             ((eq? mes 'move!) move!)
             ((eq? mes 'remove-projectile) remove-projectile)
             ((eq? mes 'get-behaviour) behaviour)
-            (else (display "Error: Wrong dispatch message (Projectile.rkt) -> ") (display mes))))
+            ((eq? mes 'minus-cooldown) minus-cooldown)
+            ((eq? mes 'get-cooldown) cooldown)
+            (eelse (display "Error: Wrong dispatch message (Projectile.rkt) -> ") (display mes))))
     (set-scale)
     (move!)
     dispatch))

@@ -26,6 +26,8 @@
 (define gray-monster-mask "../images/Monsters/gray-monster_mask.png")
 (define purple-monster-img "../images/Monsters/purple-monster.png")
 (define purple-monster-mask "../images/Monsters/purple-monster_mask.png")
+
+(define infection-duration 3000)
 ;------------------------------------------------------------------------
 
 ;--------------------------Projectile-----------------------------------

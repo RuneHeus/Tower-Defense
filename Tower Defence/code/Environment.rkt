@@ -3,7 +3,8 @@
 (define (make-environment draw path player)
 
   (let ((monsters '())
-         (towers '()))
+         (towers '())
+         (obstacles '()))
     
     (define (add-entity! entity)
       (cond ((eq? (entity 'entity?) 'monster) ;If the entity is equal to a monster
@@ -104,7 +105,7 @@
       (and (>= (+ ((monster 'get-position) 'get-x) (round (* (monster 'get-speed) (cos (monster 'get-angle))))) (position 'get-x))
            (>= (+ ((monster 'get-position) 'get-y) (round (* (monster 'get-speed) (sin (monster 'get-angle))))) (position 'get-y))))
   
-    (define (monsters-loop)
+    (define (monsters-loop ms)
       (map (lambda (monster)
              (if (<= (monster 'get-health) 0)
                  (begin
@@ -115,7 +116,10 @@
                    (remove-monster! monster "Death"))
                  (begin
                    (if (set-new-increment! monster) ;Calculates the way it has to move
-                       (move-monster! monster)))))
+                       (move-monster! monster)
+                       (if (<= (monster 'get-infection) 0)
+                           ((monster 'set-speed) (monster 'get-default-speed))
+                           ((monster 'set-infection) (- (monster 'get-infection) ms)))))))
            monsters))
 
     (define (free-position? tower)
@@ -156,7 +160,11 @@
       (if (not (= (tower 'cooldown) 0))
           (if (> 0 (- (tower 'cooldown) ms))
               ((tower 'set-cooldown!) 0)
-              ((tower 'set-cooldown!) (- (tower 'cooldown) ms)))))
+              ((tower 'set-cooldown!) (- (tower 'cooldown) ms))))
+      (if (tower 'get-projectile)
+          (if (= ((tower 'get-projectile) 'get-cooldown) 0)
+              ((tower 'get-projectile) 'remove-projectile)
+              (((tower 'get-projectile) 'minus-cooldown) ms))))
 
     (define (monster-random-event)
       (map (lambda (monster)
