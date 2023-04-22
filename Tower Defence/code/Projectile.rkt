@@ -8,16 +8,18 @@
         (damage 1)
         (cooldown 3000)
         (move? #t)
-        (behaviour '()))
+        (behaviour '())
+        (obstacle? #f))
 
 
     (case type
       ("net" (begin
                (set! tile (make-tile net-image-size net-image-size net-projectile-img net-projectile-mask))
                (set! damage 0)
+               (set! obstacle? #t)
                (set! behaviour (lambda (monster)
                                  ((monster 'set-speed!) (/ (monster 'get-speed) 2))
-                                 ((monster 'set-infection) infection-duration))))))
+                                 ((monster 'set-infection!) infection-duration))))))
 
     (define (set-scale) ;This sets the scale of projectile
       ((tile 'set-scale!) size-factor)
@@ -38,12 +40,12 @@
           (begin (calculate-move!)
                  (if (not (null? (target 'get-position)))
                      (if ((position 'close-enough?) (target 'get-position))
-                         (if (= (target 'get-infection) 0)
+                         (if (eq? (target 'get-infection) #f)
                              (begin
                                ((target 'hit!) damage)
-                               (behaviour target)
-                               (set! move? #f)
-                               ((target 'set-infection) 5000)
+                               ;(behaviour target)
+                              ; (set! move? #f)
+                               ((target 'set-infection!) 5000)
                                (if (<= cooldown 0)
                                    (remove-projectile))))
                          (if ((position 'outside-playarea?) width height)
@@ -53,11 +55,16 @@
                                (((environment 'draw) 'reposition!) tile position))))))))
     
     (define (remove-projectile)
+      (if obstacle?
+          ((environment 'set-obstacles!) (remove-el-from-list dispatch (environment 'get-obstacles))))
       ((((environment 'draw) 'projectile-layer) 'remove-drawable!) tile)
       ((tower 'set-projectile!) #f))
 
     (define (minus-cooldown value)
       (set! cooldown (- cooldown value)))
+
+    (define (set-move! val)
+      (set! move? val))
     
     (define (dispatch mes)
       (cond ((eq? mes 'get-tile) tile)
@@ -67,6 +74,9 @@
             ((eq? mes 'get-behaviour) behaviour)
             ((eq? mes 'minus-cooldown) minus-cooldown)
             ((eq? mes 'get-cooldown) cooldown)
+            ((eq? mes 'obstacle?) obstacle?)
+            ((eq? mes 'get-move) move?)
+            ((eq? mes 'set-move!) set-move!)
             (eelse (display "Error: Wrong dispatch message (Projectile.rkt) -> ") (display mes))))
     (set-scale)
     (move!)

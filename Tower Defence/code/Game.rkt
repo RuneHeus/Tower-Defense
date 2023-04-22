@@ -21,6 +21,7 @@
       (set! monster-move-time 0)
       ((environment 'set-monsters!) '())
       ((environment 'set-towers!) '())
+      ((environment 'set-obstacles!) '())
       ((wave 'set-wave!) 0)
       ((wave 'set-wave-list!) '())
       ((wave 'load-wave!))

@@ -11,7 +11,7 @@
          (on-hit '())
          (random-event '())
          (on-death '())
-         (infection 0))
+         (infection #f))
     
     (case type ;If red is chosen then no option is selected, then we use the default values
       ("Blue" (begin
@@ -105,7 +105,7 @@
             ((eq? mes 'get-type) type)
             ((eq? mes 'get-damage) damage)
             ((eq? mes 'set-speed!) set-speed!)
-            ((eq? mes 'set-infection) set-infection!)
+            ((eq? mes 'set-infection!) set-infection!)
             ((eq? mes 'get-infection) infection)
             ((eq? mes 'get-default-speed) default-speed)))
     (set-scale!)

@@ -3,8 +3,8 @@
 (define (make-environment draw path player)
 
   (let ((monsters '())
-         (towers '())
-         (obstacles '()))
+        (towers '())
+        (obstacles '()))
     
     (define (add-entity! entity)
       (cond ((eq? (entity 'entity?) 'monster) ;If the entity is equal to a monster
@@ -71,12 +71,18 @@
     (define (set-new-increment! monster)
       (let ((monster-pos (monster 'get-position))
             (move-monster? #t)
-            (next-pos (next-pos-path monster)))
+            (next-pos (next-pos-path monster))
+            (obstacle? (object-eq-pos-obstacles? monster obstacles)))
         (define (loop paths)
           (if ((monster 'endpoint?))
               (remove-monster! monster "End")
               (if (not (null? paths))
                   (begin
+                    (if (not (monster 'get-infection))
+                        (if obstacle?
+                            (begin
+                              ((obstacle? 'get-behaviour) monster)
+                              ((obstacle? 'set-move!) #f))))
                     (if ((monster-pos 'equal?) (car paths))
                         (begin 
                           ((monster 'set-angle!) (atan (- ((cadr paths) 'get-y) (monster-pos 'get-y)) (- ((cadr paths) 'get-x) (monster-pos 'get-x))))
@@ -116,10 +122,13 @@
                    (remove-monster! monster "Death"))
                  (begin
                    (if (set-new-increment! monster) ;Calculates the way it has to move
-                       (move-monster! monster)
+                       (move-monster! monster))
+                   (if (monster 'get-infection)
                        (if (<= (monster 'get-infection) 0)
-                           ((monster 'set-speed) (monster 'get-default-speed))
-                           ((monster 'set-infection) (- (monster 'get-infection) ms)))))))
+                           (begin
+                             ((monster 'set-speed!) (monster 'get-default-speed))
+                             ((monster 'set-infection!) #f))
+                           ((monster 'set-infection!) (- (monster 'get-infection) ms)))))))
            monsters))
 
     (define (free-position? tower)
@@ -138,11 +147,26 @@
                (and (>= (tow-pos 'get-x) ((car lijst) 'get-x)) (<= (tow-pos 'get-x) ((cadr lijst) 'get-x))))
               (else (loop (cdr lijst) tow-pos)))))
 
+    (define (add-obstacle obstacle)
+      (if (null? obstacles)
+          (set! obstacles (list obstacle))
+          (set! obstacles (append obstacles (list obstacle)))))
+    
+    (define (check-new-obstacles-tower)
+      (map (lambda (tower)
+             (let ((projectile (tower 'get-projectile)))
+               (if projectile
+                   (if (projectile 'obstacle?)
+                       (if (not (memq projectile obstacles))
+                           (add-obstacle projectile))))))
+           towers))
+    
     (define (towers-loop ms)
       (map (lambda (tower)
              (towers-shoot tower)
              (calculate-cooldown tower ms)
-             (check-tower-areas tower))
+             (check-tower-areas tower)
+             (check-new-obstacles-tower))
            towers))
 
     (define (set-towers! val)
@@ -170,7 +194,10 @@
       (map (lambda (monster)
              (if (not (null? (monster 'get-random-event)))
                  ((monster 'get-random-event)))) monsters))
-  
+
+    (define (set-obstacles! val)
+      (set! obstacles val))
+
     (define (dispatch mes)
       (cond ((eq? mes 'draw) draw)
             ((eq? mes 'get-monsters) monsters)
@@ -186,5 +213,8 @@
             ((eq? mes 'find-tower-by-projectile) find-tower-by-projectile)
             ((eq? mes 'remove-all-objects!) remove-all-objects!)
             ((eq? mes 'monster-random-event) monster-random-event)
+            ((eq? mes 'add-obstacle) add-obstacle)
+            ((eq? mes 'set-obstacles!) set-obstacles!)
+            ((eq? mes 'get-obstacles) obstacles)
             (else (display "Error: Wrong dispatch message (Environment.rkt) -> ") (display mes))))
     dispatch))

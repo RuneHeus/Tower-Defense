@@ -1,9 +1,10 @@
-(load "Monster.rkt")
+(#%require (only racket/base sleep))
 
-(define (make-environment draw path)
+(define (make-environment draw path player)
 
   (let ((monsters '())
-         (towers '()))
+         (towers '())
+         (obstacles '()))
     
     (define (add-entity! entity)
       (cond ((eq? (entity 'entity?) 'monster) ;If the entity is equal to a monster
@@ -29,7 +30,9 @@
       (monster 'set-next-position!)
       ((draw 'reposition!) (monster 'get-tile) (monster 'get-position)))
 
-    (define (remove-monster! monster)
+    (define (remove-monster! monster reason)
+      (if (eq? reason "End")
+          ((player 'damage!) monster))
       (define (remove list) ;Iterative searching for monster
         (if (null? list)
             '()
@@ -71,7 +74,7 @@
             (next-pos (next-pos-path monster)))
         (define (loop paths)
           (if ((monster 'endpoint?))
-              (remove-monster! monster)
+              (remove-monster! monster "End")
               (if (not (null? paths))
                   (begin
                     (if ((monster-pos 'equal?) (car paths))
@@ -102,13 +105,21 @@
       (and (>= (+ ((monster 'get-position) 'get-x) (round (* (monster 'get-speed) (cos (monster 'get-angle))))) (position 'get-x))
            (>= (+ ((monster 'get-position) 'get-y) (round (* (monster 'get-speed) (sin (monster 'get-angle))))) (position 'get-y))))
   
-    (define (monsters-loop)
+    (define (monsters-loop ms)
       (map (lambda (monster)
              (if (<= (monster 'get-health) 0)
-                 (remove-monster! monster)
+                 (begin
+                   (case (monster 'get-type)
+                     ("Purple" ((monster 'on-death) monsters (next-pos-path monster)))
+                     ("Gray" (add-entity! (make-monster "Red" (make-position (start-position 'get-x) (start-position 'get-y))))
+                             (add-entity! (make-monster "Red" (make-position (start-position 'get-x) (start-position 'get-y))))))
+                   (remove-monster! monster "Death"))
                  (begin
                    (if (set-new-increment! monster) ;Calculates the way it has to move
-                        (move-monster! monster)))))
+                       (move-monster! monster)
+                       (if (<= (monster 'get-infection) 0)
+                           ((monster 'set-speed) (monster 'get-default-speed))
+                           ((monster 'set-infection) (- (monster 'get-infection) ms)))))))
            monsters))
 
     (define (free-position? tower)
@@ -149,7 +160,16 @@
       (if (not (= (tower 'cooldown) 0))
           (if (> 0 (- (tower 'cooldown) ms))
               ((tower 'set-cooldown!) 0)
-              ((tower 'set-cooldown!) (- (tower 'cooldown) ms)))))
+              ((tower 'set-cooldown!) (- (tower 'cooldown) ms))))
+      (if (tower 'get-projectile)
+          (if (= ((tower 'get-projectile) 'get-cooldown) 0)
+              ((tower 'get-projectile) 'remove-projectile)
+              (((tower 'get-projectile) 'minus-cooldown) ms))))
+
+    (define (monster-random-event)
+      (map (lambda (monster)
+             (if (not (null? (monster 'get-random-event)))
+                 ((monster 'get-random-event)))) monsters))
   
     (define (dispatch mes)
       (cond ((eq? mes 'draw) draw)
@@ -165,5 +185,6 @@
             ((eq? mes 'draw-entity!) draw-entity!)
             ((eq? mes 'find-tower-by-projectile) find-tower-by-projectile)
             ((eq? mes 'remove-all-objects!) remove-all-objects!)
+            ((eq? mes 'monster-random-event) monster-random-event)
             (else (display "Error: Wrong dispatch message (Environment.rkt) -> ") (display mes))))
     dispatch))

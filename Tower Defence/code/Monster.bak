@@ -1,17 +1,50 @@
-(load "Constants.rkt")
+(#%require (only racket/base random))
 
 (define (make-monster type position)
-  (let ((tile (make-tile 50 50 "../images/Monsters/red-monster.png" "../images/Monsters/red-monster_mask.png"))
+  (let ((tile (make-tile image-size image-size red-monster-img red-monster-mask))
          (health 1)
          (angle 0)
-         (speed 1)
-         (last-path-position '()))
+         (speed 2)
+         (default-speed 2)
+         (damage 1)
+         (last-path-position '())
+         (on-hit '())
+         (random-event '())
+         (on-death '())
+         (infection 0))
     
-  (case type ;If red is chosen then no option is selected, then we use the default values
-    ("Blue" (begin
-              (set! health 3)
-              (set! speed health)
-              (set! tile (make-tile 50 50 "../images/Monsters/blue-monster.png" "../images/Monsters/blue-monster_mask.png")))))
+    (case type ;If red is chosen then no option is selected, then we use the default values
+      ("Blue" (begin
+                (set! health 3)
+                (set! speed health)
+                (set! default-speed 3)
+                (set! damage 2)
+                (set! tile (make-tile image-size image-size blue-monster-img blue-monster-mask))
+                (set! on-hit (lambda () (if (eq? health 1)
+                                            (set! speed 1))))))
+    
+      ("Gray" (begin
+                (set! health 3)
+                (set! damage 2)
+                (set! tile (make-tile image-size image-size gray-monster-img gray-monster-mask))
+                (set! random-event (lambda ()
+                                     (cond ((eq? speed 1) (set! speed (+ speed (random 0 3))))
+                                           ((eq? speed 3) (set! speed (+ speed (random -2 1))))
+                                           (else (set! speed (+ speed (random -1 2)))))))))
+      
+      ("Purple" (begin
+                  (set! health 1)
+                  (set! damage 3)
+                  (set! tile (make-tile image-size image-size purple-monster-img purple-monster-mask))
+                  (set! on-death (lambda (monsters next-pos)
+                                   (map (lambda (monster)
+                                          (if (not (equal? (monster 'get-type) "Purple"))
+                                              (if (and (>= ((monster 'get-position) 'get-x) (last-path-position 'get-x))
+                                                       (<= ((monster 'get-position) 'get-x) (next-pos 'get-x))
+                                                       (>= ((monster 'get-position) 'get-y) (last-path-position 'get-y))
+                                                       (<= ((monster 'get-position) 'get-y) (next-pos 'get-y)))
+                                                  ((monster 'set-health!) (+ (monster 'get-health) 1)))))
+                                        monsters))))))
   
   
     (define (set-scale!)
@@ -24,10 +57,12 @@
       ((position 'close-enough?) end-position))
 
     (define (set-next-position!)
-      ((position 'change-coordinates!) (+ (position 'get-x) (round (* speed (cos angle)))) (+ (position 'get-y) (round (* speed (sin angle))))))
+      ((position 'change-coordinates!) (round (+ (position 'get-x) (* speed (cos angle)))) (round (+ (position 'get-y) (* speed (sin angle))))))
 
-    (define (hit!)
-      (set! health (- health 1)))
+    (define (hit! damage)
+      (set-health! (- health damage))
+      (if (not (null? on-hit))
+          (on-hit)))
 
     (define (set-angle! value)
       (set! angle value))
@@ -37,7 +72,16 @@
 
     (define (set-last-path-position! position)
       (set! last-path-position position))
-  
+
+    (define (set-health! value)
+      (set! health value))
+
+    (define (set-speed! value)
+      (set! speed value))
+
+    (define (set-infection! value)
+      (set! infection value))
+    
     (define (dispatch mes)
       (cond ((eq? mes 'get-position) position)
             ((eq? mes 'set-position!) set-position!)
@@ -54,6 +98,15 @@
             ((eq? mes 'get-speed) speed)
             ((eq? mes 'hit!) hit!)
             ((eq? mes 'set-last-path-position!) set-last-path-position!)
-            ((eq? mes 'get-last-path-position) last-path-position)))
+            ((eq? mes 'get-last-path-position) last-path-position)
+            ((eq? mes 'get-random-event) random-event)
+            ((eq? mes 'on-death) on-death)
+            ((eq? mes 'set-health!) set-health!)
+            ((eq? mes 'get-type) type)
+            ((eq? mes 'get-damage) damage)
+            ((eq? mes 'set-speed!) set-speed!)
+            ((eq? mes 'set-infection) set-infection!)
+            ((eq? mes 'get-infection) infection)
+            ((eq? mes 'get-default-speed) default-speed)))
     (set-scale!)
     dispatch))
