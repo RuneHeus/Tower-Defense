@@ -11,14 +11,14 @@
 ;All the pre initialisation that is needed to start the game
 (define Path (make-path start-position end-position))
 
-(define Draw (make-draw))
-
 (define Player (make-player))
+
+(define Draw (make-draw player))
 
 (define Environment (make-environment Draw Path Player))
 
 (define Wave (make-wave Environment))
 
-(define Game (make-game Environment Wave Player))
+(define Game (make-game Environment Wave Player Draw))
 
 (Game 'start!) ;Start the game

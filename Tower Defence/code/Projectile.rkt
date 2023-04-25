@@ -11,7 +11,6 @@
         (behaviour '())
         (obstacle? #f))
 
-
     (case type
       ("net" (begin
                (set! tile (make-tile net-image-size net-image-size net-projectile-img net-projectile-mask))
@@ -29,30 +28,27 @@
     (define (calculate-move!)
       (let* ((target-x ((target 'get-position) 'get-x)) ;The new target position
              (target-y ((target 'get-position) 'get-y)) ;The new target position
-             (x (position 'get-x))
-             (y (position 'get-y))
+             (x (- (position 'get-x) 20))
+             (y (- (position 'get-y) 20))
              (calculated-x (- target-x x))
              (calculated-y (- target-y y)))
         (set! angle (atan calculated-y calculated-x))))
 
     (define (move!)
       (if move?
-          (begin (calculate-move!)
-                 (if (not (null? (target 'get-position)))
-                     (if ((position 'close-enough?) (target 'get-position))
-                         (if (eq? (target 'get-infection) #f)
-                             (begin
-                               ((target 'hit!) damage)
-                               ;(behaviour target)
-                              ; (set! move? #f)
-                               ((target 'set-infection!) 5000)
-                               (if (<= cooldown 0)
-                                   (remove-projectile))))
-                         (if ((position 'outside-playarea?) width height)
-                             (remove-projectile)
-                             (begin
-                               ((position 'change-coordinates!) (+ (position 'get-x) (* 6 (cos angle))) (+ (position 'get-y) (* 6 (sin angle))))
-                               (((environment 'draw) 'reposition!) tile position))))))))
+          (if (not (null? (target 'get-position)))
+              (if ((position 'close-enough?) (target 'get-position))
+                  (if (eq? (target 'get-infection) #f)
+                      (begin
+                        ((target 'hit!) damage)
+                        ((target 'set-infection!) 5000)
+                        (if (<= cooldown 0)
+                            (remove-projectile))))
+                  (if ((position 'outside-playarea?) width height)
+                      (remove-projectile)
+                      (begin
+                        ((position 'change-coordinates!) (+ (position 'get-x) (* 7 (cos angle))) (+ (position 'get-y) (* 7 (sin angle))))
+                        (((environment 'draw) 'reposition!) tile position)))))))
     
     (define (remove-projectile)
       (if obstacle?
@@ -79,5 +75,6 @@
             ((eq? mes 'set-move!) set-move!)
             (eelse (display "Error: Wrong dispatch message (Projectile.rkt) -> ") (display mes))))
     (set-scale)
+    (calculate-move!)
     (move!)
     dispatch))

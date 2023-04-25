@@ -10,14 +10,26 @@
         (cooldown-time 2000)
         (target #f)
         (projectile #f)
-        (projectile-type '()))
+        (projectile-type '())
+        (check-area? #t)
+        (cost 100))
 
     (case type 
       (4 (begin
            (set! tile (make-tile image-size image-size net-tower-img net-tower-mask))
            (set! projectile-type "net")
-           (set! cooldown-time 3000))))
-  
+           (set! cooldown-time 3000)
+           (set! cost 150)))
+
+      (5 (begin
+           (set! check-area? #f)
+           (set! cost 200)
+           (set! projectile (list
+                             (make-projectile projectile-type (make-position (position 'get-x) (position 'get-y)) (make-position (- (position 'get-x) 99999) (position 'get-y)) dispatch)
+                             (make-projectile projectile-type (make-position (position 'get-x) (position 'get-y)) (make-position (position 'get-x) (- (position 'get-y) 99999)) dispatch)
+                             (make-projectile projectile-type (make-position (position 'get-x) (position 'get-y)) (make-position (+ (position 'get-x) 99999) (position 'get-y)) dispatch)
+                             (make-projectile projectile-type (make-position (position 'get-x) (position 'get-y)) (make-position (position 'get-x) (+ (position 'get-y) 99999)) dispatch))))))
+   
     (define (set-scale) ;This sets the scale of the tower
       ((tile 'set-scale!) size-factor)
       ((tile 'set-x!) (+ (- (/ (* (tile 'get-w) size-factor) 2) (/ (tile 'get-w) 2)) (position 'get-x)))
@@ -80,7 +92,8 @@
             ((eq? mes 'set-cooldown!) set-cooldown!)
             ((eq? mes 'get-projectile) projectile)
             ((eq? mes 'set-projectile!) set-projectile!)
-            ((eq? mes 'remove-target) remove-target)))
+            ((eq? mes 'remove-target) remove-target)
+            ((eq? mes 'check-area?) check-area?)))
     (set-scale)
     (generate-area)
     dispatch))

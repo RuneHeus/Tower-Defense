@@ -11,7 +11,8 @@
          (on-hit '())
          (random-event '())
          (on-death '())
-         (infection #f))
+         (infection #f)
+         (points 10))
     
     (case type ;If red is chosen then no option is selected, then we use the default values
       ("Blue" (begin
@@ -19,6 +20,7 @@
                 (set! speed health)
                 (set! default-speed 3)
                 (set! damage 2)
+                (set! points 30)
                 (set! tile (make-tile image-size image-size blue-monster-img blue-monster-mask))
                 (set! on-hit (lambda () (if (eq? health 1)
                                             (set! speed 1))))))
@@ -26,6 +28,7 @@
       ("Gray" (begin
                 (set! health 3)
                 (set! damage 2)
+                (set! points 30)
                 (set! tile (make-tile image-size image-size gray-monster-img gray-monster-mask))
                 (set! random-event (lambda ()
                                      (cond ((eq? speed 1) (set! speed (+ speed (random 0 3))))
@@ -35,6 +38,7 @@
       ("Purple" (begin
                   (set! health 1)
                   (set! damage 3)
+                  (set! points 40)
                   (set! tile (make-tile image-size image-size purple-monster-img purple-monster-mask))
                   (set! on-death (lambda (monsters next-pos)
                                    (map (lambda (monster)
@@ -107,6 +111,7 @@
             ((eq? mes 'set-speed!) set-speed!)
             ((eq? mes 'set-infection!) set-infection!)
             ((eq? mes 'get-infection) infection)
-            ((eq? mes 'get-default-speed) default-speed)))
+            ((eq? mes 'get-default-speed) default-speed)
+            ((eq? mes 'get-points) points)))
     (set-scale!)
     dispatch))

@@ -1,6 +1,6 @@
 (define (make-player)
   (let ((health 10)
-        (coins 0)
+        (points 200)
         (tower-selected '())
         (power-up-selected '()))
 
@@ -16,11 +16,11 @@
     (define (set-power-up-selected! power-up)
       (set! power-up-selected power-up))
 
-    (define (remove-coins! amount)
-      (set! coins (- coins amount)))
+    (define (remove-points! amount)
+      (set! points (- points amount)))
 
-    (define (add-coins! amount)
-      (set! coins (+ coins amount)))
+    (define (add-points! amount)
+      (set! points (+ points amount)))
 
     (define (dispatch mes)
       (cond ((eq? mes 'set-health!) set-health!)
@@ -30,7 +30,8 @@
             ((eq? mes 'get-health) health)
             ((eq? mes 'get-tower-selected) tower-selected)
             ((eq? mes 'get-power-up-selected) power-up-selected)
-            ((eq? mes 'remove-coins!) remove-coins!)
-            ((eq? mes 'add-coins!) add-coins!)
+            ((eq? mes 'remove-points!) remove-points!)
+            ((eq? mes 'add-points!) add-points!)
+            ((eq? mes 'get-points) points)
             (else (display "Error: Wrong dispatch message (Player.rkt) -> ") (display mes))))
     dispatch))

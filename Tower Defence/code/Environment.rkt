@@ -48,13 +48,15 @@
       (map
        (lambda (monster)
          (((draw 'entity-layer) 'remove-drawable!) (monster 'get-tile)))
-       monsters))
+       monsters)
+      (set! monsters '()))
 
     (define (remove-all-towers!)
       (map
        (lambda (tower)
          (((draw 'entity-layer) 'remove-drawable!) (tower 'get-tile)))
-       towers))
+       towers)
+      (set! towers '()))
 
     (define (remove-all-projectiles!)
       (map
@@ -63,10 +65,18 @@
              (((draw 'projectile-layer) 'remove-drawable!) ((tower 'get-projectile) 'get-tile))))
        towers))
 
+    (define (remove-all-obstacles!)
+      (map
+       (lambda (obstacle)
+         (((draw 'entity-layer) 'remove-drawable!) (obstacle 'get-tile)))
+       obstacles)
+      (set! obstacles '()))
+
     (define (remove-all-objects!)
       (remove-all-monsters!)
       (remove-all-towers!)
-      (remove-all-projectiles!))
+      (remove-all-projectiles!)
+      (remove-all-obstacles!))
   
     (define (set-new-increment! monster)
       (let ((monster-pos (monster 'get-position))
@@ -119,7 +129,9 @@
                      ("Purple" ((monster 'on-death) monsters (next-pos-path monster)))
                      ("Gray" (add-entity! (make-monster "Red" (make-position (start-position 'get-x) (start-position 'get-y))))
                              (add-entity! (make-monster "Red" (make-position (start-position 'get-x) (start-position 'get-y))))))
-                   (remove-monster! monster "Death"))
+                   (remove-monster! monster "Death")
+                   ((player 'add-points!) (monster 'get-points))
+                   (display (player 'get-points)))
                  (begin
                    (if (set-new-increment! monster) ;Calculates the way it has to move
                        (move-monster! monster))
@@ -166,7 +178,8 @@
              (towers-shoot tower)
              (calculate-cooldown tower ms)
              (check-tower-areas tower)
-             (check-new-obstacles-tower))
+             (if (tower 'check-area?)
+                 (check-new-obstacles-tower)))
            towers))
 
     (define (set-towers! val)
