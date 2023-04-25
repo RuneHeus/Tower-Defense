@@ -130,7 +130,8 @@
                      ("Gray" (add-entity! (make-monster "Red" (make-position (start-position 'get-x) (start-position 'get-y))))
                              (add-entity! (make-monster "Red" (make-position (start-position 'get-x) (start-position 'get-y))))))
                    (remove-monster! monster "Death")
-                   ((player 'add-points!) (monster 'get-points)))
+                   ((player 'add-points!) (monster 'get-points))
+                   (display (player 'get-points)))
                  (begin
                    (if (set-new-increment! monster) ;Calculates the way it has to move
                        (move-monster! monster))
