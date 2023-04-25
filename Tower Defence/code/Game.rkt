@@ -16,7 +16,7 @@
     (define (clean!)
       (load-world!)
       ((draw 'remove-start-text!))
-      ((draw 'remove-all-text!))
+      ((draw 'remove-previous-text!))
       (set! monster-spawn-time 0)
       (set! monster-move-time 0)
       ((environment 'remove-all-objects!))

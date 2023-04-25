@@ -18,7 +18,6 @@
         ((text-layer 'remove-drawable!) previous-text)
         ((tex-tile 'draw-text!) (string-append "Points: " (number->string (player 'get-points))) (* size-factor 10) (* size-factor 700) (* size-factor 100) "black")
         ((text-layer 'add-drawable!) tex-tile)
-        (add-tile-to-list tex-tile)
         (set! previous-text tex-tile)))
 
     (define (draw! drawable)
@@ -32,11 +31,15 @@
       (let ((text-tile (make-tile width height)))
         ((text-tile 'draw-text!) (string-append "Points: " (number->string (player 'get-points))) (* size-factor 10) (* size-factor 700) (* size-factor 100) "black")
         ((text-layer 'add-drawable!) text-tile)
-        (add-tile-to-list text-tile)
         (set! previous-text text-tile)))
 
     (define (remove-start-text!)
       ((text-layer 'remove-drawable!) start-text))
+
+    (define (remove-previous-text!)
+      (if (not (null? previous-text))
+          (begin ((text-layer 'remove-drawable!) previous-text)
+                 (set! previous-text'()))))
     
     (define (draw-world!)
       (let ((tile (make-tile width height))
@@ -47,7 +50,6 @@
         ((tile 'draw-rectangle!) (* size-factor 300) (* size-factor 500) (* 500 size-factor)  (* 50 size-factor) "brown") ;Pad ((15,35) -> (40,35)) (division)
         ((background-layer 'add-drawable!) tile)
         ((restart-text 'draw-text!) "Press 'space' to restart" (* size-factor 12) (* size-factor 600) (* size-factor 50) "black")
-        (add-tile-to-list restart-text)
         ((text-layer 'add-drawable!) restart-text))
       ;    (define (draw-stripes-horizontal!)
       ;      (let loop ((pos-tile (make-tile width height))
@@ -71,19 +73,6 @@
       ;    (draw-stripes-vertical!)
       )
 
-    (define (add-tile-to-list tile)
-      (if (null? all-used-tiles)
-          (set! all-used-tiles (list tile))
-          (set! all-used-tiles (append all-used-tiles (list tile)))))
-
-    (define (remove-all-text!)
-      (for-each
-       (lambda (tile)
-         ((text-layer 'remove-drawable!) tile))
-       all-used-tiles))
-
-    (define (empty-used-tiles!)
-      (set! all-used-tiles '()))
 
     (define (dispatch mes)
       (cond ((eq? mes 'draw!) draw!)
@@ -100,8 +89,8 @@
             ((eq? mes 'draw-game-status-text) draw-game-status-text)
             ((eq? mes 'update-game-status!) update-game-status!)
             ((eq? mes 'remove-start-text!) remove-start-text!)
-            ((eq? mes 'reset-all-text!) reset-all-text!)
             ((eq? mes 'empty-used-tiles!) empty-used-tiles!)
             ((eq? mes 'remove-all-text!) remove-all-text!)
+            ((eq? mes 'remove-previous-text!) remove-previous-text!)
             (else (display "Error: Wrong dispatch message (Draw.rkt) ") (display mes))))
     dispatch))
