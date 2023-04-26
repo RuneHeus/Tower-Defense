@@ -4,7 +4,7 @@
 (define (make-game environment wave player draw)
 
   (let ((monster-spawn-time 0)
-         (monster-move-time 0))
+        (monster-move-time 0))
   
     (define (start!)
       ((draw 'draw-start-text))
@@ -19,20 +19,14 @@
       ((draw 'remove-previous-text!))
       (set! monster-spawn-time 0)
       (set! monster-move-time 0)
-      ((environment 'remove-all-objects!))
-      ((environment 'set-monsters!) '())
-      ((environment 'set-towers!) '())
-      ((environment 'set-obstacles!) '())
-      ((wave 'set-wave!) 0)
-      ((wave 'set-wave-list!) '())
-      ((wave 'load-wave!))
+      ((environment 'clean-environment!))
+      ((wave 'start-wave!))
       ((draw 'draw-game-status-text))
       (game-loop))
 
     (define (game-loop) ;This starts the game loop
       (((draw 'get-window) 'set-update-callback!)
        (lambda (ms)
-         ((draw 'update-game-status!))
          (set! monster-spawn-time (+ monster-spawn-time ms))
          (set! monster-move-time (+ monster-move-time ms)); Add the extra elapsed time to time-elapsed
          (time-handler ms))) ;Call the time handler to trigger event on certain elapsed time
@@ -47,7 +41,7 @@
       (((draw 'get-window) 'set-key-callback!)
        (lambda (type key)
          (if (and (eq? type 'pressed) (eq? key #\space))
-             (begin (display "Restart") (clean!))))))
+             (clean!)))))
   
     (define (load-world!)
       (draw 'draw-world!)) ;Call draw-world! from Draw ADT

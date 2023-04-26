@@ -6,19 +6,11 @@
          (text-layer ((window 'new-layer!)))
          (text (make-tile width height))
          (start-text (make-tile width height))
-         (previous-text '())
-         (all-used-tiles '()))
+         (previous-text '()))
     
     (define (reposition! tile position)
       ((tile 'set-x!) (+ (- (/ (* (tile 'get-w) size-factor) 2) (/ (tile 'get-w) 2)) (position 'get-x)))
       ((tile 'set-y!) (+ (- (/ (* (tile 'get-h) size-factor) 2) (/ (tile 'get-h) 2)) (position 'get-y))))
-
-    (define (update-game-status!)
-      (let ((tex-tile (make-tile width height)))
-        ((text-layer 'remove-drawable!) previous-text)
-        ((tex-tile 'draw-text!) (string-append "Points: " (number->string (player 'get-points))) (* size-factor 10) (* size-factor 700) (* size-factor 100) "black")
-        ((text-layer 'add-drawable!) tex-tile)
-        (set! previous-text tex-tile)))
 
     (define (draw! drawable)
       ((entity-layer 'add-drawable!) drawable))
@@ -28,6 +20,8 @@
       ((text-layer 'add-drawable!) start-text))
 
     (define (draw-game-status-text)
+      (if (not (null? previous-text))
+          ((text-layer 'remove-drawable!) previous-text))
       (let ((text-tile (make-tile width height)))
         ((text-tile 'draw-text!) (string-append "Points: " (number->string (player 'get-points))) (* size-factor 10) (* size-factor 700) (* size-factor 100) "black")
         ((text-layer 'add-drawable!) text-tile)
@@ -50,28 +44,7 @@
         ((tile 'draw-rectangle!) (* size-factor 300) (* size-factor 500) (* 500 size-factor)  (* 50 size-factor) "brown") ;Pad ((15,35) -> (40,35)) (division)
         ((background-layer 'add-drawable!) tile)
         ((restart-text 'draw-text!) "Press 'space' to restart" (* size-factor 12) (* size-factor 600) (* size-factor 50) "black")
-        ((text-layer 'add-drawable!) restart-text))
-      ;    (define (draw-stripes-horizontal!)
-      ;      (let loop ((pos-tile (make-tile width height))
-      ;                 (y 0))
-      ;        (cond ((> y height) ((pos-layer 'add-drawable!) pos-tile))
-      ;              (else
-      ;               (begin
-      ;                 ((pos-tile 'draw-line!) 0 y width y 1 "black")
-      ;                 (loop pos-tile (+ y (* 50 size-factor))))))))
-      ;
-      ;    (define (draw-stripes-vertical!)
-      ;      (let loop ((pos-tile (make-tile width height))
-      ;                 (x 0))
-      ;        (cond ((> x width) ((pos-layer 'add-drawable!) pos-tile))
-      ;              (else
-      ;               (begin
-      ;                 ((pos-tile 'draw-line!) x 0 x height 1 "black")
-      ;                 (loop pos-tile (+ x (* 50 size-factor))))))))
-      ;                                      
-      ;    (draw-stripes-horizontal!)
-      ;    (draw-stripes-vertical!)
-      )
+        ((text-layer 'add-drawable!) restart-text)))
 
 
     (define (dispatch mes)
@@ -87,7 +60,6 @@
             ((eq? mes 'get-start-text) start-text)
             ((eq? mes 'get-text-layer) text-layer)
             ((eq? mes 'draw-game-status-text) draw-game-status-text)
-            ((eq? mes 'update-game-status!) update-game-status!)
             ((eq? mes 'remove-start-text!) remove-start-text!)
             ((eq? mes 'empty-used-tiles!) empty-used-tiles!)
             ((eq? mes 'remove-all-text!) remove-all-text!)

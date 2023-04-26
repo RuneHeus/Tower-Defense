@@ -77,6 +77,12 @@
       (remove-all-towers!)
       (remove-all-projectiles!)
       (remove-all-obstacles!))
+
+    (define (clean-environment!)
+      (remove-all-objects!)
+      (set-monsters! '())
+      (set-towers! '())
+      (set-obstacles! '()))
   
     (define (set-new-increment! monster)
       (let ((monster-pos (monster 'get-position))
@@ -130,7 +136,8 @@
                      ("Gray" (add-entity! (make-monster "Red" (make-position (start-position 'get-x) (start-position 'get-y))))
                              (add-entity! (make-monster "Red" (make-position (start-position 'get-x) (start-position 'get-y))))))
                    (remove-monster! monster "Death")
-                   ((player 'add-points!) (monster 'get-points)))
+                   ((player 'add-points!) (monster 'get-points))
+                   ((draw 'draw-game-status-text)))
                  (begin
                    (if (set-new-increment! monster) ;Calculates the way it has to move
                        (move-monster! monster))
@@ -228,5 +235,6 @@
             ((eq? mes 'add-obstacle) add-obstacle)
             ((eq? mes 'set-obstacles!) set-obstacles!)
             ((eq? mes 'get-obstacles) obstacles)
+            ((eq? mes 'clean-environment!) clean-environment!)
             (else (display "Error: Wrong dispatch message (Environment.rkt) -> ") (display mes))))
     dispatch))
