@@ -1,1 +1,3 @@
-(list 1 2 3 4 5 6)
+(#%require "Graphics.rkt")
+
+;(generate-mask "../images/Towers/tower6.png" "white")

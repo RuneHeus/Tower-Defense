@@ -1,4 +1,3 @@
-(#%require "Graphics.rkt")
 (load "Position.rkt")
 
 ;--------------------------UI--------------------------------------------
@@ -45,42 +44,4 @@
 (define standard-tower-mask "../images/Towers/tower1_mask.png")
 (define net-tower-img "../images/Towers/tower4.png")
 (define net-tower-mask "../images/Towers/tower4_mask.png")
-(define bullet-tower-img "../images/Towers/tower5.png")
-(define bullet-tower-mask "../images/Towers/tower5_mask.png")
-(define bom-tower-img "../images/Towers/tower6.png")
-(define bom-tower-mask "../images/Towers/tower6_mask.png")
 ;------------------------------------------------------------------------
-
-;--------------------------Menu--------------------------------------------------------------------------
-
-;--------------tower1-------------------------------------------------------------------
-(define tower1 (make-tile image-size image-size standard-tower-img standard-tower-mask))
-(define tower1-pos (make-position 650 150))
-((tower1 'set-x!) (tower1-pos 'get-x))
-((tower1 'set-y!) (tower1-pos 'get-y))
-;----------------------------------------------------------------------------------------
-
-;--------------tower4-------------------------------------------------------------------
-(define tower4 (make-tile image-size image-size net-tower-img net-tower-mask))
-(define tower4-pos (make-position 700 150))
-((tower4 'set-x!) (tower4-pos 'get-x))
-((tower4 'set-y!) (tower4-pos 'get-y))
-;----------------------------------------------------------------------------------------
-
-;--------------tower5-------------------------------------------------------------------
-(define tower5 (make-tile image-size image-size bullet-tower-img bullet-tower-mask))
-(define tower5-pos (make-position 650 200))
-((tower5 'set-x!) (tower5-pos 'get-x))
-((tower5 'set-y!) (tower5-pos 'get-y))
-;----------------------------------------------------------------------------------------
-
-;--------------tower6-------------------------------------------------------------------
-(define tower6 (make-tile image-size image-size bom-tower-img bom-tower-mask))
-(define tower6-pos (make-position 700 200))
-((tower6 'set-x!) (tower6-pos 'get-x))
-((tower6 'set-y!) (tower6-pos 'get-y))
-;----------------------------------------------------------------------------------------
-
-(define menu-list (list tower1 tower4 tower5 tower6))
-(define menu-positions (list (cons 1 tower1-pos) (cons 4 tower4-pos) (cons 5 tower5-pos) (cons 6 tower6-pos)))
-;-------------------------------------------------------------------------------------------------------
