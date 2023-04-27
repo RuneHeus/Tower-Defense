@@ -23,11 +23,3 @@
       (if (eq? el (car list))
           (remove-el-from-list el (cdr list))
           (cons (car list) (remove-el-from-list el (cdr list))))))
-
-(define (entity-passed-obstacle? entity obstacle)
-  (let ((passed? #f))
-    (map (lambda (item)
-           (if (eq? item obstacle)
-               (set! passed? #t)))
-         (entity 'get-passed-obstacles))
-    passed?))

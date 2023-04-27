@@ -14,7 +14,7 @@
         (check-area? #t)
         (cost 100))
 
-    (case type 
+    (case type
       (4 (begin
            (set! tile (make-tile image-size image-size net-tower-img net-tower-mask))
            (set! projectile-type "net")

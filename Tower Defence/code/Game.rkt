@@ -38,7 +38,7 @@
              (let ((selected? #f))
                (map (lambda (item)
                       (if (((cdr item) 'equal?) (make-position (- x (- (modulo x (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50)))) (- y (- (modulo y (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50))))))
-                          (begin (display "Selected tower: ") (display (car item)) ((player 'set-selected-tower!) (car item)) (set! selected? #t))))
+                          (begin ((player 'set-selected-tower!) (car item)) (set! selected? #t))))
                     menu-positions)
                (if (not selected?)
                    (let ((tower (make-tower (player 'get-tower-selected) (make-position (- x (- (modulo x (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50)))) (- y (- (modulo y (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50))))) environment)))

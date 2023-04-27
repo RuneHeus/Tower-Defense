@@ -38,11 +38,12 @@
       (if move?
           (if (not (null? (target 'get-position)))
               (if ((position 'close-enough?) (target 'get-position))
-                  (begin
-                    ((target 'hit!) damage)
-                    ((target 'set-infection!) 5000)
-                    (if (<= cooldown 0)
-                        (remove-projectile)))
+                  (if (eq? (target 'get-infection) #f)
+                      (begin
+                        ((target 'hit!) damage)
+                        ((target 'set-infection!) 5000)
+                        (if (<= cooldown 0)
+                            (remove-projectile))))
                   (if ((position 'outside-playarea?) width height)
                       (remove-projectile)
                       (begin
@@ -51,7 +52,7 @@
     
     (define (remove-projectile)
       (if obstacle?
-          ((environment 'set-obstacles!) (remove-el-from-list dispatch (environment 'get-obstacles)))) ;If projectile = obstacle, delete it from the environment list
+          ((environment 'set-obstacles!) (remove-el-from-list dispatch (environment 'get-obstacles))))
       ((((environment 'draw) 'projectile-layer) 'remove-drawable!) tile)
       ((tower 'set-projectile!) #f))
 

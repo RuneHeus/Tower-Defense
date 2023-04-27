@@ -12,7 +12,8 @@
          (random-event '())
          (on-death '())
          (infection #f)
-         (points 10))
+         (points 10)
+         (passsed-obstacles '()))
     
     (case type ;If red is chosen then no option is selected, then we use the default values
       ("Blue" (begin
@@ -85,6 +86,11 @@
 
     (define (set-infection! value)
       (set! infection value))
+
+    (define (add-passed-obstacle! obstacle)
+      (if (null? passsed-obstacles)
+          (set! passed-obstacles (list obstacle))
+          (set! passed-obstacles (append passed-obstacles (list obstacle)))))
     
     (define (dispatch mes)
       (cond ((eq? mes 'get-position) position)
@@ -112,6 +118,8 @@
             ((eq? mes 'set-infection!) set-infection!)
             ((eq? mes 'get-infection) infection)
             ((eq? mes 'get-default-speed) default-speed)
-            ((eq? mes 'get-points) points)))
+            ((eq? mes 'get-points) points)
+            ((eq? mes 'add-passed-obstacle!) add-passed-obstacle!)
+            ((eq? mes 'get-passed-obstacles) passsed-obstacles)))
     (set-scale!)
     dispatch))
