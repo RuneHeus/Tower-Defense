@@ -83,7 +83,8 @@
       (set-monsters! '())
       (set-towers! '())
       (set-obstacles! '()))
-  
+
+      
     (define (set-new-increment! monster)
       (let ((monster-pos (monster 'get-position))
             (move-monster? #t)
@@ -95,7 +96,7 @@
               (if (not (null? paths))
                   (begin
                     (if obstacle? ;If the monster is at in range of a obstacle
-                        (if (entity-passed-obstacle? monster obstacle?)
+                        (if (entity-passed-obstacle? monster obstacle?)f
                             (begin
                               ((obstacle? 'get-behaviour) monster)
                               ((obstacle? 'set-move!) #f)
