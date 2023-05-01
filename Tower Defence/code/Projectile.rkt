@@ -74,6 +74,7 @@
             ((eq? mes 'obstacle?) obstacle?)
             ((eq? mes 'get-move) move?)
             ((eq? mes 'set-move!) set-move!)
+            ((eq? mes 'get-type) type)
             (eelse (display "Error: Wrong dispatch message (Projectile.rkt) -> ") (display mes))))
     (set-scale)
     (calculate-move!)

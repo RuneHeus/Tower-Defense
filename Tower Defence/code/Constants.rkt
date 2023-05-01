@@ -1,5 +1,7 @@
 (#%require "Graphics.rkt")
 (load "Position.rkt")
+(load "Tower.rkt")
+
 
 ;--------------------------UI--------------------------------------------
 (define width 800) ;width of the window
@@ -54,33 +56,34 @@
 ;--------------------------Menu--------------------------------------------------------------------------
 
 ;--------------tower1-------------------------------------------------------------------
-(define tower1 (make-tile image-size image-size standard-tower-img standard-tower-mask))
 (define tower1-pos (make-position 650 150))
-((tower1 'set-x!) (tower1-pos 'get-x))
-((tower1 'set-y!) (tower1-pos 'get-y))
+(define tower1 (make-tower 1 tower1-pos "Dummy environment"))
+(define cost-text1 (make-tile width height))
+((cost-text1 'draw-text!) (number->string (tower1 'get-cost)) (* size-factor 10) (* size-factor 660) (* size-factor 200) "white")
 ;----------------------------------------------------------------------------------------
 
 ;--------------tower4-------------------------------------------------------------------
-(define tower4 (make-tile image-size image-size net-tower-img net-tower-mask))
 (define tower4-pos (make-position 700 150))
-((tower4 'set-x!) (tower4-pos 'get-x))
-((tower4 'set-y!) (tower4-pos 'get-y))
+(define tower4 (make-tower 4 tower4-pos "Dummy environment"))
+(define cost-text4 (make-tile width height))
+((cost-text4 'draw-text!) (number->string (tower4 'get-cost)) (* size-factor 10) (* size-factor 710) (* size-factor 200) "white")
 ;----------------------------------------------------------------------------------------
 
 ;--------------tower5-------------------------------------------------------------------
-(define tower5 (make-tile image-size image-size bullet-tower-img bullet-tower-mask))
-(define tower5-pos (make-position 650 200))
-((tower5 'set-x!) (tower5-pos 'get-x))
-((tower5 'set-y!) (tower5-pos 'get-y))
+(define tower5-pos (make-position 650 220))
+(define tower5 (make-tower 5 tower5-pos "Dummy environment"))
+(define cost-text5 (make-tile width height))
+((cost-text5 'draw-text!) (number->string (tower5 'get-cost)) (* size-factor 10) (* size-factor 660) (* size-factor 270) "white")
 ;----------------------------------------------------------------------------------------
 
 ;--------------tower6-------------------------------------------------------------------
-(define tower6 (make-tile image-size image-size bom-tower-img bom-tower-mask))
-(define tower6-pos (make-position 700 200))
-((tower6 'set-x!) (tower6-pos 'get-x))
-((tower6 'set-y!) (tower6-pos 'get-y))
+(define tower6-pos (make-position 700 220))
+(define tower6 (make-tower 6 tower6-pos "Dummy environment"))
+(define cost-text6 (make-tile width height))
+((cost-text6 'draw-text!) (number->string (tower6 'get-cost)) (* size-factor 10) (* size-factor 710) (* size-factor 270) "white")
 ;----------------------------------------------------------------------------------------
 
 (define menu-list (list tower1 tower4 tower5 tower6))
-(define menu-positions (list (cons 1 tower1-pos) (cons 4 tower4-pos) (cons 5 tower5-pos) (cons 6 tower6-pos)))
+(define menu-cost (list cost-text1 cost-text4 cost-text5 cost-text6))
+(define menu-positions (list (cons tower1 tower1-pos) (cons tower4 tower4-pos) (cons tower5 tower5-pos) (cons tower6 tower6-pos)))
 ;-------------------------------------------------------------------------------------------------------

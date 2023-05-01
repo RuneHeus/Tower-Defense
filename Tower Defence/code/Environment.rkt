@@ -69,8 +69,7 @@
       (map
        (lambda (obstacle)
          (((draw 'entity-layer) 'remove-drawable!) (obstacle 'get-tile)))
-       obstacles)
-      (set! obstacles '()))
+       obstacles))
 
     (define (remove-all-objects!)
       (remove-all-monsters!)
@@ -203,8 +202,8 @@
               ((tower 'set-cooldown!) 0)
               ((tower 'set-cooldown!) (- (tower 'cooldown) ms))))
       (if (tower 'get-projectile)
-          (if (= ((tower 'get-projectile) 'get-cooldown) 0)
-              ((tower 'get-projectile) 'remove-projectile)
+          (if (<= ((tower 'get-projectile) 'get-cooldown) 0)
+              (((tower 'get-projectile) 'remove-projectile))
               (((tower 'get-projectile) 'minus-cooldown) ms))))
 
     (define (monster-random-event)
