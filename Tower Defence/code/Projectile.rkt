@@ -17,7 +17,7 @@
                (set! damage 0)
                (set! obstacle? #t)
                (set! behaviour (lambda (monster)
-                                 ((monster 'set-speed!) (/ (monster 'get-speed) 2))
+                                 ((monster 'set-speed!) (/ (monster 'get-default-speed) 2))
                                  ((monster 'set-infection!) infection-duration))))))
 
     (define (set-scale) ;This sets the scale of projectile
@@ -36,18 +36,20 @@
 
     (define (move!)
       (if move?
-          (if (not (null? (target 'get-position)))
-              (if ((position 'close-enough?) (target 'get-position))
-                  (begin
-                    ((target 'hit!) damage)
-                    ((target 'set-infection!) 5000)
-                    (if (<= cooldown 0)
-                        (remove-projectile)))
-                  (if ((position 'outside-playarea?) width height)
-                      (remove-projectile)
-                      (begin
-                        ((position 'change-coordinates!) (+ (position 'get-x) (* 7 (cos angle))) (+ (position 'get-y) (* 7 (sin angle))))
-                        (((environment 'draw) 'reposition!) tile position)))))))
+          (begin
+            (if (not (null? (target 'get-position)))
+                (if ((position 'close-enough?) (target 'get-position))
+                    (begin
+                      (if obstacle? ;Is the projectile a obstacle?
+                          (set-move! #f))
+                      ((target 'hit!) damage)
+                      (if (or (<= cooldown 0) (not obstacle?))
+                          (remove-projectile)))))
+            (if ((position 'outside-playarea?) width height)
+                (remove-projectile)
+                (begin
+                  ((position 'change-coordinates!) (+ (position 'get-x) (* 7 (cos angle))) (+ (position 'get-y) (* 7 (sin angle))))
+                  (((environment 'draw) 'reposition!) tile position))))))
     
     (define (remove-projectile)
       (if obstacle?
@@ -72,6 +74,7 @@
             ((eq? mes 'obstacle?) obstacle?)
             ((eq? mes 'get-move) move?)
             ((eq? mes 'set-move!) set-move!)
+            ((eq? mes 'get-type) type)
             (eelse (display "Error: Wrong dispatch message (Projectile.rkt) -> ") (display mes))))
     (set-scale)
     (calculate-move!)

@@ -19,7 +19,7 @@
            (set! tile (make-tile image-size image-size net-tower-img net-tower-mask))
            (set! projectile-type "net")
            (set! cooldown-time 3000)
-           (set! cost 150)))
+           (set! cost 100)))
 
       (5 (begin
            (set! tile (make-tile image-size image-size bullet-tower-img bullet-tower-mask))
@@ -92,7 +92,9 @@
             ((eq? mes 'get-projectile) projectile)
             ((eq? mes 'set-projectile!) set-projectile!)
             ((eq? mes 'remove-target) remove-target)
-            ((eq? mes 'check-area?) check-area?)))
+            ((eq? mes 'check-area?) check-area?)
+            ((eq? mes 'get-cost) cost)
+            ((eq? mes 'get-type) type)))
     (set-scale)
     (generate-area)
     dispatch))

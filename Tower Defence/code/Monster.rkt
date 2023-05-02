@@ -11,7 +11,7 @@
          (on-hit '())
          (random-event '())
          (on-death '())
-         (infection #f)
+         (infection #f) ;Eather false or a cooldown number
          (points 10)
          (passsed-obstacles '()))
     
@@ -37,7 +37,7 @@
                                            (else (set! speed (+ speed (random -1 2)))))))))
       
       ("Purple" (begin
-                  (set! health 1)
+                  (set! health 4)
                   (set! damage 3)
                   (set! points 40)
                   (set! tile (make-tile image-size image-size purple-monster-img purple-monster-mask))
