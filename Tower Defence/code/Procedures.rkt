@@ -1,6 +1,8 @@
 ;This file is all about procedures that dont belong anywhere
 ;There procedures are made to clear up some Racket files
 
+(#%require (only racket/base random))
+
 (define (object-eq-pos-obstacles? object obstacles)
   (let ((exist? #f))
     (if (null? obstacles)
@@ -36,3 +38,19 @@
 ;               (set! passed? #t)))
 ;         (entity 'get-passed-obstacles))
 ;    passed?))
+
+
+(define (pick-random-from-list lst . but);But = the item in the list that it can not chose
+  (if (null? but)
+      (set! lst (remove-el-from-list lst but))
+      (pick-random-from-list (remove-el-from-list (car but) lst) (cdr but)));If a arg is given, delete it from the list
+  (list-ref lst (random 0 (length lst))))
+
+
+(define (random-pos-between-points pos1 pos2)
+  (let ((angle (atan (- (pos2 'get-y) (pos1 'get-y)) (- (pos2 'get-x) (pos1 'get-x))))
+        (calculated-position '()))
+    (if (= (round (cos angle)) 0)
+        (set! calculated-position (make-position (pos1 'get-x) (inexact->exact (random (+ (pos1 'get-y) 1) (pos2 'get-y)))))
+        (set! calculated-position (make-position (inexact->exact (random (+ (pos1 'get-x) 1) (pos2 'get-x)) (pos1 'get-y)))))
+    calculated-position))

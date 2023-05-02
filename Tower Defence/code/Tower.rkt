@@ -29,7 +29,7 @@
       (6 (begin
            (set! tile (make-tile image-size image-size bom-tower-img bom-tower-mask)))))
    
-    (define (set-scale) ;This sets the scale of the tower
+    (define (set-scale!) ;This sets the scale of the tower
       ((tile 'set-scale!) size-factor)
       ((tile 'set-x!) (+ (- (/ (* (tile 'get-w) size-factor) 2) (/ (tile 'get-w) 2)) (position 'get-x)))
       ((tile 'set-y!) (+ (- (/ (* (tile 'get-h) size-factor) 2) (/ (tile 'get-h) 2)) (position 'get-y))))
@@ -95,6 +95,6 @@
             ((eq? mes 'check-area?) check-area?)
             ((eq? mes 'get-cost) cost)
             ((eq? mes 'get-type) type)))
-    (set-scale)
+    (set-scale!)
     (generate-area)
     dispatch))

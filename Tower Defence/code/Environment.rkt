@@ -13,7 +13,7 @@
                  (set! monsters (append monsters (list entity))))
              (draw-entity! entity))
             ((eq? (entity 'entity?) 'tower)
-             (if (and (free-position? entity) (not (on-path? entity)))
+             (if (and (free-position? entity) (not ((path 'on-path?) entity)))
                  (begin (if (null? towers)
                             (set! towers (list entity))
                             (set! towers (append towers (list entity))))
@@ -87,8 +87,8 @@
     (define (set-new-increment! monster)
       (let ((monster-pos (monster 'get-position))
             (move-monster? #t) ;Is the monster allowed to move?
-            (next-pos (next-pos-path monster)) ;The next path position from the monster
-            (obstacle? (object-eq-pos-obstacles? monster obstacles))) ;Is the monster close enough to a obstacle?
+            (next-pos ((path 'next-path-to-pos) (monster 'get-last-path-position))) ;The next path position from the monster
+            (obstacle? (object-eq-pos-obstacles? monster obstacles)));Is the monster close enough to a obstacle?
         (define (loop paths) ;Loop through all the path positions
           (if ((monster 'endpoint?))
               (begin (remove-monster! monster "End") ((draw 'draw-game-status-text)))
@@ -100,7 +100,7 @@
                         (begin 
                           ((monster 'set-angle!) (atan (- ((cadr paths) 'get-y) (monster-pos 'get-y)) (- ((cadr paths) 'get-x) (monster-pos 'get-x))))
                           ((monster 'set-last-path-position!) (car paths)))
-                        (if (next-pos-to-far? monster next-pos) ;Is the monster going to overshoot the next path position?
+                        (if ((path 'next-pos-to-far?) monster next-pos) ;Is the monster going to overshoot the next path position?
                             (begin
                               ((monster-pos 'change-coordinates!) (next-pos 'get-x) (next-pos 'get-y))
                               ((draw 'reposition!) (monster 'get-tile) (monster 'get-position))
@@ -108,21 +108,6 @@
                     (loop (cdr paths))))))
         (loop (path 'path-positions))
         move-monster?))
-
-    (define (next-pos-path monster)
-      (define (loop paths)
-        (if (not (null? paths))
-            (if (((monster 'get-last-path-position) 'equal?) (car paths))
-                (car (cdr paths))
-                (loop (cdr paths)))
-            '()))
-      (if (null? (monster 'get-last-path-position))
-          (car (path 'path-positions))
-          (loop (path 'path-positions))))
-
-    (define (next-pos-to-far? monster position);If the increment for the next position is greater than the position of the path, then the code wont recognize that he passed that position, so with this code it fixes that
-      (and (>= (+ ((monster 'get-position) 'get-x) (round (* (monster 'get-speed) (cos (monster 'get-angle))))) (position 'get-x))
-           (>= (+ ((monster 'get-position) 'get-y) (round (* (monster 'get-speed) (sin (monster 'get-angle))))) (position 'get-y))))
   
     (define (monsters-loop ms)
       (map (lambda (monster)
@@ -146,10 +131,10 @@
                            ((monster 'set-infection!) (- (monster 'get-infection) ms)))))))
            monsters))
 
-    (define (free-position? tower)
+    (define (free-position? tower) ;Checks if there already is a tower in the position
       (let loop ((lijst towers))
         (cond ((null? lijst) #t)
-              ((or ((((car lijst) 'get-position) 'equal?) (tower 'get-position)) (on-path? tower)) #f)
+              ((or ((((car lijst) 'get-position) 'equal?) (tower 'get-position)) ((path 'on-path?) tower)) #f)
               (else (loop (cdr lijst))))))
   
     (define (on-path? tower)

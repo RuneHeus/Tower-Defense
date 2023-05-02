@@ -54,27 +54,37 @@
          (if game-loop
              (if (and (eq? button 'left)
                       (eq? status 'pressed))
-                 (begin
-                   (if (null? (player 'get-tower-selected))
-                       (map (lambda (item)
-                              (if (((cdr item) 'equal?) (make-position (- x (- (modulo x (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50)))) (- y (- (modulo y (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50))))))
-                                  ((player 'set-selected-tower!) (car item))))
-                            menu-positions)
-                   
-                       (if (>= (player 'get-points) ((player 'get-tower-selected) 'get-cost))
-                           (begin
-                             ((player 'remove-points!) ((player 'get-tower-selected) 'get-cost))
-                             ((draw 'draw-game-status-text))
-                             (let ((tower (make-tower ((player 'get-tower-selected) 'get-type) (make-position (- x (- (modulo x (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50)))) (- y (- (modulo y (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50))))) environment)))
-                               ((environment 'add-entity!) tower)
-                               ((player 'set-selected-tower!) '())))
-                           (begin (display "Not enough points!") (newline)))))))))
+                 (let ((menu-clicked #f))
+                   (begin
+                     (map (lambda (item)
+                            (if (((cdr item) 'equal?) (make-position (- x (- (modulo x (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50)))) (- y (- (modulo y (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50))))))
+                                (begin
+                                  (set! menu-clicked #t)
+                                  (if (eq? ((car item) 'entity?) 'power-up)
+                                      ((environment 'add-obstacle) (make-power-up ((car item) 'get-type) path))
+                                      ((player 'set-selected-tower!) (car item))))))
+                          menu-positions)
+                     (if (not menu-clicked)
+                         (if (not (null? (player 'get-tower-selected)))
+                             (if (>= (player 'get-points) ((player 'get-tower-selected) 'get-cost))
+                                 (begin
+                                   ((player 'remove-points!) ((player 'get-tower-selected) 'get-cost))
+                                   ((draw 'draw-game-status-text))
+                                   (let ((tower (make-tower ((player 'get-tower-selected) 'get-type) (make-position (- x (- (modulo x (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50)))) (- y (- (modulo y (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50))))) environment)))
+                                     ((environment 'add-entity!) tower)
+                                     ((player 'set-selected-tower!) '())))
+                                 (begin (display "Not enough points!") (newline)))))))))))
       
       (((draw 'get-window) 'set-key-callback!)
        (lambda (type key)
          (if game-loop
              (if (and (eq? type 'pressed) (eq? key #\space))
-                 (begin ((draw 'draw-game-status-text)) (clean!)))))))
+                 (begin ((draw 'draw-game-status-text)) (clean!))))))
+      (((draw 'get-window) 'set-key-callback!)
+       (lambda (type key)
+         (if game-loop
+             (if (and (eq? type 'pressed) (eq? key #\m))
+                 (begin ((player 'set-points!) 99999999) ((draw 'draw-game-status-text))))))))
   
     (define (load-world!)
       (draw 'draw-world!)) ;Call draw-world! from Draw ADT

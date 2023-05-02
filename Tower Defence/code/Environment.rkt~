@@ -69,35 +69,38 @@
       (map
        (lambda (obstacle)
          (((draw 'entity-layer) 'remove-drawable!) (obstacle 'get-tile)))
-       obstacles)
-      (set! obstacles '()))
+       obstacles))
 
     (define (remove-all-objects!)
       (remove-all-monsters!)
       (remove-all-towers!)
       (remove-all-projectiles!)
       (remove-all-obstacles!))
-  
+
+    (define (clean-environment!)
+      (remove-all-objects!)
+      (set-monsters! '())
+      (set-towers! '())
+      (set-obstacles! '()))
+
+      
     (define (set-new-increment! monster)
       (let ((monster-pos (monster 'get-position))
-            (move-monster? #t)
-            (next-pos (next-pos-path monster))
-            (obstacle? (object-eq-pos-obstacles? monster obstacles)))
-        (define (loop paths)
+            (move-monster? #t) ;Is the monster allowed to move?
+            (next-pos (next-pos-path monster)) ;The next path position from the monster
+            (obstacle? (object-eq-pos-obstacles? monster obstacles))) ;Is the monster close enough to a obstacle?
+        (define (loop paths) ;Loop through all the path positions
           (if ((monster 'endpoint?))
-              (remove-monster! monster "End")
+              (begin (remove-monster! monster "End") ((draw 'draw-game-status-text)))
               (if (not (null? paths))
                   (begin
-                    (if (not (monster 'get-infection))
-                        (if obstacle?
-                            (begin
-                              ((obstacle? 'get-behaviour) monster)
-                              ((obstacle? 'set-move!) #f))))
+                    (if obstacle? ;If the monster is at in range of a obstacle
+                        ((obstacle? 'get-behaviour) monster))
                     (if ((monster-pos 'equal?) (car paths))
                         (begin 
                           ((monster 'set-angle!) (atan (- ((cadr paths) 'get-y) (monster-pos 'get-y)) (- ((cadr paths) 'get-x) (monster-pos 'get-x))))
                           ((monster 'set-last-path-position!) (car paths)))
-                        (if (next-pos-to-far? monster next-pos)
+                        (if (next-pos-to-far? monster next-pos) ;Is the monster going to overshoot the next path position?
                             (begin
                               ((monster-pos 'change-coordinates!) (next-pos 'get-x) (next-pos 'get-y))
                               ((draw 'reposition!) (monster 'get-tile) (monster 'get-position))
@@ -131,7 +134,7 @@
                              (add-entity! (make-monster "Red" (make-position (start-position 'get-x) (start-position 'get-y))))))
                    (remove-monster! monster "Death")
                    ((player 'add-points!) (monster 'get-points))
-                   (display (player 'get-points)))
+                   ((draw 'draw-game-status-text)))
                  (begin
                    (if (set-new-increment! monster) ;Calculates the way it has to move
                        (move-monster! monster))
@@ -199,8 +202,8 @@
               ((tower 'set-cooldown!) 0)
               ((tower 'set-cooldown!) (- (tower 'cooldown) ms))))
       (if (tower 'get-projectile)
-          (if (= ((tower 'get-projectile) 'get-cooldown) 0)
-              ((tower 'get-projectile) 'remove-projectile)
+          (if (<= ((tower 'get-projectile) 'get-cooldown) 0)
+              (((tower 'get-projectile) 'remove-projectile))
               (((tower 'get-projectile) 'minus-cooldown) ms))))
 
     (define (monster-random-event)
@@ -229,5 +232,6 @@
             ((eq? mes 'add-obstacle) add-obstacle)
             ((eq? mes 'set-obstacles!) set-obstacles!)
             ((eq? mes 'get-obstacles) obstacles)
+            ((eq? mes 'clean-environment!) clean-environment!)
             (else (display "Error: Wrong dispatch message (Environment.rkt) -> ") (display mes))))
     dispatch))

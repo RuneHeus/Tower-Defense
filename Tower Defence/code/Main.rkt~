@@ -8,7 +8,7 @@
 (load "Player.rkt")
 (load "Procedures.rkt")
 
-;All the pre initialisation that is needed to start the game
+;All the pre initialisation that are needed to start the game
 (define Path (make-path start-position end-position))
 
 (define Player (make-player))

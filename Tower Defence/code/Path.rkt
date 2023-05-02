@@ -10,11 +10,39 @@
   
     (define (endpoint? monster)
       (((monster 'position) 'equal?) end-position))
+
+    (define (next-path-to-pos pos) ;Gives back the next path position relative to given parameter position
+      (define (loop lst)
+        (if (((car lst) 'equal?) pos)
+            (if (null? (cdr lst))
+                '()
+                (car (cdr lst)))
+            (loop (cdr lst))))
+      (if (null? pos)
+          (car path-positions)
+          (loop path-positions)))
+
+    (define (next-pos-to-far? pos next-pos) ;If the increment for the next position is greater than the position of the path, then the code wont recognize that he passed that position, so with this code it fixes that
+      (and (>= (+ ((pos 'get-position) 'get-x) (round (* (pos 'get-speed) (cos (pos 'get-angle))))) (next-pos 'get-x))
+           (>= (+ ((pos 'get-position) 'get-y) (round (* (pos 'get-speed) (sin (pos 'get-angle))))) (next-pos 'get-y))))
+
+    (define (on-path? object)
+      (let loop ((lijst (path 'path-positions))
+                 (object-pos (object 'get-position)))
+        (cond ((null? (cdr lijst)) #f)
+              ((and (= (object-pos 'get-x) ((car lijst) 'get-x)) (= (object-pos 'get-x) ((cadr lijst) 'get-x)))
+               (and (>= (object-pos 'get-y) ((car lijst) 'get-y)) (<= (object-pos 'get-y) ((cadr lijst) 'get-y))))
+              ((and (= (object-pos 'get-y) ((car lijst) 'get-y)) (= (object-pos 'get-y) ((cadr lijst) 'get-y)))
+               (and (>= (object-pos 'get-x) ((car lijst) 'get-x)) (<= (object-pos 'get-x) ((cadr lijst) 'get-x))))
+              (else (loop (cdr lijst) object-pos)))))
   
     (define (dispatch mes)
       (cond ((eq? mes 'start-position) start-position)
             ((eq? mes 'end-position) end-position)
             ((eq? mes 'path-positions) path-positions)
             ((eq? mes 'endpoint?) endpoint?)
+            ((eq? mes 'next-path-to-pos) next-path-to-pos)
+            ((eq? mes 'next-pos-to-far?) next-pos-to-far?)
+            ((eq? mes 'on-path?) on-path?)
             (else (display "Error: Wrong dispatch message (Path.rkt)"))))
     dispatch))
