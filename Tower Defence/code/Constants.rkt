@@ -56,6 +56,8 @@
 ;--------------------------Power-Up--------------------------------------
 (define portal-img "../images/Power-ups/portal.png")
 (define portal-maks "../images/Power-ups/portal_mask.png")
+(define portal-copy-img "../images/Power-ups/portal-alt.png")
+(define portal-copy-maks "../images/Power-ups/portal-alt_mask.png")
 ;------------------------------------------------------------------------
 
 ;--------------------------Menu--------------------------------------------------------------------------

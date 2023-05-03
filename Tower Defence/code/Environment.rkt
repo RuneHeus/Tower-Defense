@@ -91,13 +91,15 @@
             (obstacle? (object-eq-pos-obstacles? monster obstacles)));Is the monster close enough to a obstacle?
         (define (loop paths) ;Loop through all the path positions
           (if ((monster 'endpoint?))
-              (begin (remove-monster! monster "End") ((draw 'draw-game-status-text)))
+              (begin
+                (remove-monster! monster "End")
+                ((draw 'draw-game-status-text)))
               (if (not (null? paths))
                   (begin
                     (if obstacle? ;If the monster is at in range of a obstacle
                         ((obstacle? 'get-behaviour) monster))
                     (if ((monster-pos 'equal?) (car paths))
-                        (begin 
+                        (begin
                           ((monster 'set-angle!) (atan (- ((cadr paths) 'get-y) (monster-pos 'get-y)) (- ((cadr paths) 'get-x) (monster-pos 'get-x))))
                           ((monster 'set-last-path-position!) (car paths)))
                         (if ((path 'next-pos-to-far?) monster next-pos) ;Is the monster going to overshoot the next path position?
@@ -151,7 +153,9 @@
       (if (null? obstacles)
           (set! obstacles (list obstacle))
           (set! obstacles (append obstacles (list obstacle))))
-      (((draw 'get-power-up-layer) 'add-drawable!) (obstacle 'get-tile)))
+      (((draw 'get-power-up-layer) 'add-drawable!) (obstacle 'get-tile))
+      (if (eq? (obstacle 'get-type) "portal")
+          (((draw 'get-power-up-layer) 'add-drawable!) (obstacle 'get-portal-copy))))
     
     (define (check-new-obstacles-tower)
       (map (lambda (tower)

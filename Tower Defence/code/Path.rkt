@@ -44,5 +44,6 @@
             ((eq? mes 'next-path-to-pos) next-path-to-pos)
             ((eq? mes 'next-pos-to-far?) next-pos-to-far?)
             ((eq? mes 'on-path?) on-path?)
+            ((eq? mes 'get-path1) path1)
             (else (display "Error: Wrong dispatch message (Path.rkt)"))))
     dispatch))
