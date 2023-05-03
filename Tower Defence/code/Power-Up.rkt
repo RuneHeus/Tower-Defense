@@ -3,7 +3,7 @@
 (define (make-power-up type path . dummy?)
   (let ((tile '())
         (portal-copy (make-tile image-size image-size portal-copy-img portal-copy-maks))
-        (time 5000)
+        (timer 5000)
         (position portal-pos)
         (behaviour '()))
     
@@ -36,6 +36,12 @@
       ((tile 'set-x!) (+ (- (/ (* (tile 'get-w) size-factor) 2) (/ (tile 'get-w) 2)) (position 'get-x)))
       ((tile 'set-y!) (+ (- (/ (* (tile 'get-h) size-factor) 2) (/ (tile 'get-h) 2)) (position 'get-y))))
 
+    (define (set-timer! time)
+      (set! timer time))
+
+    (define (minus-time! amount)
+      (set! timer (- timer amount)))
+
     (define (dispatch mes)
       (cond ((eq? mes 'get-tile) tile)
             ((eq? mes 'entity?) 'power-up)
@@ -43,6 +49,9 @@
             ((eq? mes 'get-position) position)
             ((eq? mes 'get-behaviour) behaviour)
             ((eq? mes 'get-portal-copy) portal-copy)
+            ((eq? mes 'get-timer) timer)
+            ((eq? mes 'set-timer!) set-timer!)
+            ((eq? mes 'minus-time!) minus-time!)
             (else (display "Error: Wrong dispatch message (Power-Up.rkt) -> ") (display mes))))
     (set-scale!)
     dispatch))

@@ -79,10 +79,7 @@
        (lambda (type key)
          (if game-loop
              (if (and (eq? type 'pressed) (eq? key #\space))
-                 (begin ((draw 'draw-game-status-text)) (clean!))))))
-      (((draw 'get-window) 'set-key-callback!)
-       (lambda (type key)
-         (if game-loop
+                 (begin ((draw 'draw-game-status-text)) (clean!)))
              (if (and (eq? type 'pressed) (eq? key #\m))
                  (begin ((player 'set-points!) 99999999) ((draw 'draw-game-status-text))))))))
   
@@ -97,7 +94,8 @@
       (if (>= monster-move-time 10) ;Only move monster each 10 ms, so that it runs sort of even on every computer
           (begin (set! monster-move-time 0)
                  ((environment 'monsters-loop) ms)
-                 ((environment 'towers-loop) ms))))
+                 ((environment 'towers-loop) ms)
+                 ((environment 'obstacle-process) ms))))
   
     (define (dispatch mes)
       (cond ((eq? mes 'start!) (start!))
