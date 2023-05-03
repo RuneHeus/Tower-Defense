@@ -150,7 +150,8 @@
     (define (add-obstacle obstacle)
       (if (null? obstacles)
           (set! obstacles (list obstacle))
-          (set! obstacles (append obstacles (list obstacle)))))
+          (set! obstacles (append obstacles (list obstacle))))
+      (((draw 'get-power-up-layer) 'add-drawable!) (obstacle 'get-tile)))
     
     (define (check-new-obstacles-tower)
       (map (lambda (tower)

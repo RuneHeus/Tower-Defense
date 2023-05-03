@@ -3,4 +3,4 @@
 
 ;(generate-mask "../images/Power-ups/portal-alt.png" "white")
 
-(exact->inexact 300.0)
+

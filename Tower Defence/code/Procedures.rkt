@@ -39,18 +39,21 @@
 ;         (entity 'get-passed-obstacles))
 ;    passed?))
 
-
-(define (pick-random-from-list lst . but);But = the item in the list that it can not chose
-  (if (null? but)
-      (set! lst (remove-el-from-list lst but))
-      (pick-random-from-list (remove-el-from-list (car but) lst) (cdr but)));If a arg is given, delete it from the list
-  (list-ref lst (random 0 (length lst))))
+(define (pick-random-from-list lst . but);but = Is the element(s) in the list that it can not chose
+  (define (loop lst2 but2)
+    (if (not (null? but2))
+        (loop (remove-el-from-list (car but2) lst2) (cdr but2))
+        (list-ref lst2 (random 0 (length lst2)))))
+  (loop lst but))
 
 
 (define (random-pos-between-points pos1 pos2)
   (let ((angle (atan (- (pos2 'get-y) (pos1 'get-y)) (- (pos2 'get-x) (pos1 'get-x))))
         (calculated-position '()))
     (if (= (round (cos angle)) 0)
-        (set! calculated-position (make-position (pos1 'get-x) (inexact->exact (random (+ (pos1 'get-y) 1) (pos2 'get-y)))))
-        (set! calculated-position (make-position (inexact->exact (random (+ (pos1 'get-x) 1) (pos2 'get-x)) (pos1 'get-y)))))
+        (let ((calculated-y (random (inexact->exact (+ (pos1 'get-y) 1)) (inexact->exact (pos2 'get-y)))))
+          (if (< calculated-y 250)
+              (set! calculated-y 250))
+          (set! calculated-position (make-position (pos1 'get-x) calculated-y)))
+        (set! calculated-position (make-position (random (inexact->exact (+ (pos1 'get-x) 1)) (inexact->exact (pos2 'get-x))) (pos1 'get-y))))
     calculated-position))
