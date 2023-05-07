@@ -8,7 +8,6 @@
         (behaviour '()))
     
     (case type
-      ("bomb" (begin))
       ("portal" (begin
                   (set! tile (make-tile image-size image-size portal-img portal-maks))
                   (if (null? dummy?)

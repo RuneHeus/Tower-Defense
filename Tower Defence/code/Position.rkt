@@ -12,8 +12,10 @@
     (define (equal? position)
       (and (= x (position 'get-x)) (= y (position 'get-y))))
 
-    (define (in-area? position)
-      (and (>= x (position 'get-x)) (>= y (position 'get-y))))
+    (define (in-area? entity-pos range)
+      (and
+       (and (>= (entity-pos 'get-x) (- x (* 50 range))) (>= (entity-pos 'get-y) (- y (* 50 range))))
+       (and (<= (entity-pos 'get-x) (+ x (* 50 range))) (<= (entity-pos 'get-y) (+ y (* 50 range))))))
 
     (define (change-coordinates! num1 num2)
       (set! x num1)

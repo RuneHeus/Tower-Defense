@@ -181,7 +181,6 @@
     (define (obstacle-process ms)
       (map
        (lambda (obstacle)
-         (newline)
          (if (<= (obstacle 'get-timer) 0)
              (begin
                (remove-obstacle! obstacle)
@@ -207,9 +206,12 @@
               ((tower 'set-cooldown!) 0)
               ((tower 'set-cooldown!) (- (tower 'cooldown) ms))))
       (if (tower 'get-projectile)
-          (if (<= ((tower 'get-projectile) 'get-cooldown) 0)
-              (((tower 'get-projectile) 'remove-projectile))
-              (((tower 'get-projectile) 'minus-cooldown) ms))))
+          (if (<= ((tower 'get-projectile) 'get-timer) 0)
+              (begin
+                (if ((tower 'get-projectile) 'obstacle?)
+                    (set! obstacles (remove-el-from-list (tower 'get-projectile) obstacles)))
+                (((tower 'get-projectile) 'remove-projectile)))
+              (((tower 'get-projectile) 'minus-time!) ms))))
 
     (define (monster-random-event)
       (map (lambda (monster)

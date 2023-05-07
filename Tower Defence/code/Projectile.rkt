@@ -1,4 +1,5 @@
 (load "Position.rkt")
+(#%require (only racket/base random))
 
 (define (make-projectile type position target tower)
   
@@ -6,11 +7,10 @@
         (target-pos (make-position ((target 'get-position) 'get-x) ((target 'get-position) 'get-y)))
         (angle 0)
         (damage 1)
-        (cooldown 3000)
+        (timer 3000)
         (move? #t)
         (behaviour '())
-        (obstacle? #f)
-        (area '()))
+        (obstacle? #f))
 
     (case type
       ("net" (begin
@@ -22,7 +22,8 @@
                                  ((monster 'set-infection!) infection-duration)))))
       ("bomb" (begin
                 (set! tile (make-tile net-image-size net-image-size bomb-img bomb-mask))
-                )))
+                (set! obstacle? #t)
+                (set! damage (random 1 3)))))
 
     (define (set-scale) ;This sets the scale of projectile
       ((tile 'set-scale!) size-factor)
@@ -47,12 +48,12 @@
                       (if obstacle? ;Is the projectile a obstacle?
                           (set-move! #f))
                       ((target 'hit!) damage)
-                      (if (or (<= cooldown 0) (not obstacle?))
+                      (if (or (<= timer 0) (not obstacle?))
                           (remove-projectile)))))
             (if ((position 'outside-playarea?) width height)
                 (remove-projectile)
                 (begin
-                  ((position 'change-coordinates!) (+ (position 'get-x) (* 7 (cos angle))) (+ (position 'get-y) (* 7 (sin angle))))
+                  ((position 'change-coordinates!) (+ (position 'get-x) (* 10 (cos angle))) (+ (position 'get-y) (* 10 (sin angle))))
                   (((environment 'draw) 'reposition!) tile position))))))
     
     (define (remove-projectile)
@@ -61,8 +62,8 @@
       ((((environment 'draw) 'projectile-layer) 'remove-drawable!) tile)
       ((tower 'set-projectile!) #f))
 
-    (define (minus-cooldown value)
-      (set! cooldown (- cooldown value)))
+    (define (minus-timer value)
+      (set! timer (- timer value)))
 
     (define (set-move! val)
       (set! move? val))
@@ -73,13 +74,13 @@
             ((eq? mes 'move!) move!)
             ((eq? mes 'remove-projectile) remove-projectile)
             ((eq? mes 'get-behaviour) behaviour)
-            ((eq? mes 'minus-cooldown) minus-cooldown)
-            ((eq? mes 'get-cooldown) cooldown)
+            ((eq? mes 'minus-time!) minus-timer)
+            ((eq? mes 'get-timer) timer)
             ((eq? mes 'obstacle?) obstacle?)
             ((eq? mes 'get-move) move?)
             ((eq? mes 'set-move!) set-move!)
             ((eq? mes 'get-type) type)
-            (eelse (display "Error: Wrong dispatch message (Projectile.rkt) -> ") (display mes))))
+            (else (display "Error: Wrong dispatch message (Projectile.rkt) -> ") (display mes))))
     (set-scale)
     (calculate-move!)
     (move!)

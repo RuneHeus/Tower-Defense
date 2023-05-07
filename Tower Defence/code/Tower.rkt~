@@ -14,23 +14,22 @@
         (check-area? #t)
         (cost 100))
 
-    (case type 
+    (case type
       (4 (begin
            (set! tile (make-tile image-size image-size net-tower-img net-tower-mask))
            (set! projectile-type "net")
            (set! cooldown-time 3000)
-           (set! cost 150)))
+           (set! cost 100)))
 
       (5 (begin
+           (set! tile (make-tile image-size image-size bullet-tower-img bullet-tower-mask))
            (set! check-area? #f)
-           (set! cost 200)
-           (set! projectile (list
-                             (make-projectile projectile-type (make-position (position 'get-x) (position 'get-y)) (make-position (- (position 'get-x) 99999) (position 'get-y)) dispatch)
-                             (make-projectile projectile-type (make-position (position 'get-x) (position 'get-y)) (make-position (position 'get-x) (- (position 'get-y) 99999)) dispatch)
-                             (make-projectile projectile-type (make-position (position 'get-x) (position 'get-y)) (make-position (+ (position 'get-x) 99999) (position 'get-y)) dispatch)
-                             (make-projectile projectile-type (make-position (position 'get-x) (position 'get-y)) (make-position (position 'get-x) (+ (position 'get-y) 99999)) dispatch))))))
+           (set! cost 200)))
+
+      (6 (begin
+           (set! tile (make-tile image-size image-size bom-tower-img bom-tower-mask)))))
    
-    (define (set-scale) ;This sets the scale of the tower
+    (define (set-scale!) ;This sets the scale of the tower
       ((tile 'set-scale!) size-factor)
       ((tile 'set-x!) (+ (- (/ (* (tile 'get-w) size-factor) 2) (/ (tile 'get-w) 2)) (position 'get-x)))
       ((tile 'set-y!) (+ (- (/ (* (tile 'get-h) size-factor) 2) (/ (tile 'get-h) 2)) (position 'get-y))))
@@ -93,7 +92,9 @@
             ((eq? mes 'get-projectile) projectile)
             ((eq? mes 'set-projectile!) set-projectile!)
             ((eq? mes 'remove-target) remove-target)
-            ((eq? mes 'check-area?) check-area?)))
-    (set-scale)
+            ((eq? mes 'check-area?) check-area?)
+            ((eq? mes 'get-cost) cost)
+            ((eq? mes 'get-type) type)))
+    (set-scale!)
     (generate-area)
     dispatch))
