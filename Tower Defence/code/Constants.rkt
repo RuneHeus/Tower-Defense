@@ -58,6 +58,8 @@
 (define portal-maks "../images/Power-ups/portal_mask.png")
 (define portal-copy-img "../images/Power-ups/portal-alt.png")
 (define portal-copy-maks "../images/Power-ups/portal-alt_mask.png")
+(define bomb-img "../images/Power-ups/bomb.png")
+(define bomb-mask "../images/Power-ups/bomb_mask.png")
 ;------------------------------------------------------------------------
 
 ;--------------------------Menu--------------------------------------------------------------------------

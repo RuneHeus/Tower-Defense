@@ -13,7 +13,8 @@
          (on-death '())
          (infection #f) ;Eather false or a cooldown number
          (points 10)
-         (passsed-obstacles '()))
+         (passsed-obstacles '())
+         (area '()))
     
     (case type ;If red is chosen then no option is selected, then we use the default values
       ("Blue" (begin

@@ -9,7 +9,8 @@
         (cooldown 3000)
         (move? #t)
         (behaviour '())
-        (obstacle? #f))
+        (obstacle? #f)
+        (area '()))
 
     (case type
       ("net" (begin
@@ -18,7 +19,10 @@
                (set! obstacle? #t)
                (set! behaviour (lambda (monster)
                                  ((monster 'set-speed!) (/ (monster 'get-default-speed) 2))
-                                 ((monster 'set-infection!) infection-duration))))))
+                                 ((monster 'set-infection!) infection-duration)))))
+      ("bomb" (begin
+                (set! tile (make-tile net-image-size net-image-size bomb-img bomb-mask))
+                )))
 
     (define (set-scale) ;This sets the scale of projectile
       ((tile 'set-scale!) size-factor)

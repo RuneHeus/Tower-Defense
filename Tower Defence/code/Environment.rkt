@@ -181,7 +181,6 @@
     (define (obstacle-process ms)
       (map
        (lambda (obstacle)
-         (display (obstacle 'get-timer))
          (newline)
          (if (<= (obstacle 'get-timer) 0)
              (begin
