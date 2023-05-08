@@ -1,5 +1,6 @@
 (load "Tower.rkt")
 (load "Monster.rkt")
+(#%require (only racket/base random))
 
 (define (make-game environment wave player draw)
 
@@ -61,7 +62,12 @@
                                 (begin
                                   (set! menu-clicked #t)
                                   (if (eq? ((car item) 'entity?) 'power-up)
-                                      ((environment 'add-obstacle) (make-power-up ((car item) 'get-type) path))
+                                      (if (eq? ((car item) 'get-type) "bomb")
+                                          (let ((rand-amount (random 1 5)))
+                                            (do ((i 0 (+ i 1)))
+                                              ((= i rand-amount))
+                                              ((environment 'add-obstacle) (make-power-up ((car item) 'get-type) path))))
+                                          ((environment 'add-obstacle) (make-power-up ((car item) 'get-type) path)))
                                       ((player 'set-selected-tower!) (car item))))))
                           menu-positions)
                      (if (not menu-clicked)

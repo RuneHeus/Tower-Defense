@@ -100,7 +100,8 @@
               (if (not (null? paths))
                   (begin
                     (if obstacle? ;If the monster is at in range of a obstacle
-                        ((obstacle? 'get-behaviour) monster))
+                        (if (not (eq? (obstacle? 'get-type) "bomb"))
+                            ((obstacle? 'get-behaviour) monster)))
                     (if ((monster-pos 'equal?) (car paths))
                         (begin
                           ((monster 'set-angle!) (atan (- ((cadr paths) 'get-y) (monster-pos 'get-y)) (- ((cadr paths) 'get-x) (monster-pos 'get-x))))
@@ -119,7 +120,7 @@
              (if (<= (monster 'get-health) 0)
                  (begin
                    (case (monster 'get-type)
-                     ("Purple" ((monster 'on-death) monsters (next-pos-path monster)))
+                     ("Purple" ((monster 'on-death) monsters ((path 'next-path-to-pos) (monster 'get-last-path-position) )))
                      ("Gray" (add-entity! (make-monster "Red" (make-position (start-position 'get-x) (start-position 'get-y))))
                              (add-entity! (make-monster "Red" (make-position (start-position 'get-x) (start-position 'get-y))))))
                    (remove-monster! monster "Death")
@@ -186,7 +187,19 @@
                (remove-obstacle! obstacle)
                (((draw 'get-power-up-layer) 'remove-drawable!) (obstacle 'get-tile))
                (((draw 'get-power-up-layer) 'remove-drawable!) (obstacle 'get-portal-copy)))
-             ((obstacle 'minus-time!) ms)))
+             (if (<= (obstacle 'get-timer) 500)
+                 (if (eq? (obstacle 'get-type) "bomb")
+                     (begin
+                       (((draw 'get-power-up-layer) 'remove-drawable!) (obstacle 'get-tile))
+                       ((obstacle 'set-tile!) (make-tile explosion-size explosion-size explosion-img explosion-mask))
+                       ((draw 'reposition!) (obstacle 'get-tile) (obstacle 'get-position) 2)
+                       (((draw 'get-power-up-layer) 'add-drawable!) (obstacle 'get-tile))
+                       (map (lambda (monster)
+                              (if (((obstacle 'get-position) 'in-area?) (monster 'get-position) explosion-range)
+                                  ((obstacle 'get-behaviour) monster)))
+                            monsters)
+                       ((obstacle 'minus-time!) ms)))))
+         ((obstacle 'minus-time!) ms))
        obstacles))
 
     (define (set-towers! val)

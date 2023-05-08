@@ -57,3 +57,7 @@
           (set! calculated-position (make-position (pos1 'get-x) calculated-y)))
         (set! calculated-position (make-position (random (inexact->exact (+ (pos1 'get-x) 1)) (inexact->exact (pos2 'get-x))) (pos1 'get-y))))
     calculated-position))
+
+(define (create-target-pos target)
+  (if (not (null? target))
+      (make-position ((target 'get-position) 'get-x) ((target 'get-position) 'get-y))))

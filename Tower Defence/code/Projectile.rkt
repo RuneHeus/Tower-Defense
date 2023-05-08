@@ -4,7 +4,7 @@
 (define (make-projectile type position target tower)
   
   (let ((tile (make-tile projectile-image-size projectile-image-size standard-projectile-img standard-projectile-mask))
-        (target-pos (make-position ((target 'get-position) 'get-x) ((target 'get-position) 'get-y)))
+        (target-pos (create-target-pos target))
         (angle 0)
         (damage 1)
         (timer 3000)
@@ -23,7 +23,8 @@
       ("bomb" (begin
                 (set! tile (make-tile net-image-size net-image-size bomb-img bomb-mask))
                 (set! obstacle? #t)
-                (set! damage (random 1 3)))))
+                (set! damage (random 1 3))
+                (set! behaviour (lambda (monster) ((monster 'hit!) damage)))))) ;Random 1 or 2
 
     (define (set-scale) ;This sets the scale of projectile
       ((tile 'set-scale!) size-factor)
@@ -82,6 +83,8 @@
             ((eq? mes 'get-type) type)
             (else (display "Error: Wrong dispatch message (Projectile.rkt) -> ") (display mes))))
     (set-scale)
-    (calculate-move!)
-    (move!)
+    (if (not (null? target))
+        (begin
+          (calculate-move!)
+          (move!)))
     dispatch))

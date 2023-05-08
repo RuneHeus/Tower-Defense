@@ -18,6 +18,7 @@
 
 ;--------------------------Image-----------------------------------------
 (define image-size 50)
+(define explosion-size 250)
 ;------------------------------------------------------------------------
 
 ;--------------------------Monster---------------------------------------
@@ -60,6 +61,9 @@
 (define portal-copy-maks "../images/Power-ups/portal-alt_mask.png")
 (define bomb-img "../images/Power-ups/bomb.png")
 (define bomb-mask "../images/Power-ups/bomb_mask.png")
+(define explosion-img "../images/Power-ups/explosion.png")
+(define explosion-mask "../images/Power-ups/explosion_mask.png")
+(define explosion-range 3)
 ;------------------------------------------------------------------------
 
 ;--------------------------Menu--------------------------------------------------------------------------
@@ -94,14 +98,20 @@
 
 ;--------------portal-------------------------------------------------------------------
 (define portal-pos (make-position 650 300))
-(define portal (make-power-up "portal" "Dummy path" "Dummy")) ;This is a dummy portal
+(define portal (make-power-up "portal" "Dummy path" "Dummy environment" "Dummy")) ;This is a dummy portal
 ;----------------------------------------------------------------------------------------
 
-(define menu-list (list tower1 tower4 tower5 tower6 portal))
+;--------------bomb-------------------------------------------------------------------
+(define bomb-pos (make-position 700 300))
+(define bomb (make-power-up "bomb" "Dummy path" "Dummy environment" "Dummy")) ;This is a dummy bomb
+;---------------------------------------------------------------------------------------
+
+(define menu-list (list tower1 tower4 tower5 tower6 portal bomb))
 (define menu-cost (list cost-text1 cost-text4 cost-text5 cost-text6))
 (define menu-positions (list (cons tower1 tower1-pos)
                              (cons tower4 tower4-pos)
                              (cons tower5 tower5-pos)
                              (cons tower6 tower6-pos)
-                             (cons portal portal-pos)))
+                             (cons portal portal-pos)
+                             (cons bomb bomb-pos)))
 ;-------------------------------------------------------------------------------------------------------
