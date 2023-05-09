@@ -70,9 +70,9 @@
                                                   (do ((i 0 (+ i 1)))
                                                     ((= i rand-amount))
                                                     ((environment 'add-obstacle) (make-power-up ((car item) 'get-type) path))))))
-                                          (if (= (player 'get-portal-timer) 0)
+                                          (if (null? (player 'get-portal-timer))
                                               (begin
-                                                ((player 'set-portal-time!) 5000)
+                                                ((player 'set-portal-time!) 10000)
                                                 ((draw 'add-portal-opacity!))
                                                 ((environment 'add-obstacle) (make-power-up ((car item) 'get-type) path)))))
                                       ((player 'set-selected-tower!) (car item))))))
@@ -112,11 +112,12 @@
                  (player-process ms))))
 
     (define (player-process ms)
-      (if (<= (player 'get-portal-timer) 0)
-          (begin
-            ((player 'set-portal-time!) 0)
-            ((draw 'remove-portal-opacity!)))
-          ((player 'portal-minus-time) ms)))
+      (if (not (null? (player 'get-portal-timer)))
+          (if (<= (player 'get-portal-timer) 0)
+              (begin
+                ((player 'set-portal-time!) '())
+                ((draw 'remove-portal-opacity!)))
+              ((player 'portal-minus-time) ms))))
    
     (define (dispatch mes)
       (cond ((eq? mes 'start!) (start!))

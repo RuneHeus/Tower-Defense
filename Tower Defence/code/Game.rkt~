@@ -1,5 +1,6 @@
 (load "Tower.rkt")
 (load "Monster.rkt")
+(#%require (only racket/base random))
 
 (define (make-game environment wave player draw)
 
@@ -54,27 +55,46 @@
          (if game-loop
              (if (and (eq? button 'left)
                       (eq? status 'pressed))
-                 (begin
-                   (if (null? (player 'get-tower-selected))
-                       (map (lambda (item)
-                              (if (((cdr item) 'equal?) (make-position (- x (- (modulo x (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50)))) (- y (- (modulo y (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50))))))
-                                  ((player 'set-selected-tower!) (car item))))
-                            menu-positions)
-                   
-                       (if (>= (player 'get-points) ((player 'get-tower-selected) 'get-cost))
-                           (begin
-                             ((player 'remove-points!) ((player 'get-tower-selected) 'get-cost))
-                             ((draw 'draw-game-status-text))
-                             (let ((tower (make-tower ((player 'get-tower-selected) 'get-type) (make-position (- x (- (modulo x (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50)))) (- y (- (modulo y (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50))))) environment)))
-                               ((environment 'add-entity!) tower)
-                               ((player 'set-selected-tower!) '())))
-                           (begin (display "Not enough points!") (newline)))))))))
+                 (let ((menu-clicked #f))
+                   (begin
+                     (map (lambda (item)
+                            (if (((cdr item) 'equal?) (make-position (- x (- (modulo x (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50)))) (- y (- (modulo y (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50))))))
+                                (begin
+                                  (set! menu-clicked #t)
+                                  (if (eq? ((car item) 'entity?) 'power-up)
+                                      (if (eq? ((car item) 'get-type) "bomb")
+                                          (if (= (player 'get-bomb-timer) 0)
+                                              (begin
+                                                ((player 'set-bomb-time!) 5000)
+                                                (let ((rand-amount (random 1 5)))
+                                                  (do ((i 0 (+ i 1)))
+                                                    ((= i rand-amount))
+                                                    ((environment 'add-obstacle) (make-power-up ((car item) 'get-type) path))))))
+                                          (if (= (player 'get-portal-timer) 0)
+                                              (begin
+                                                ((player 'set-portal-time!) 5000)
+                                                ((draw 'add-portal-opacity!))
+                                                ((environment 'add-obstacle) (make-power-up ((car item) 'get-type) path)))))
+                                      ((player 'set-selected-tower!) (car item))))))
+                          menu-positions)
+                     (if (not menu-clicked)
+                         (if (not (null? (player 'get-tower-selected)))
+                             (if (>= (player 'get-points) ((player 'get-tower-selected) 'get-cost))
+                                 (begin
+                                   ((player 'remove-points!) ((player 'get-tower-selected) 'get-cost))
+                                   ((draw 'draw-game-status-text))
+                                   (let ((tower (make-tower ((player 'get-tower-selected) 'get-type) (make-position (- x (- (modulo x (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50)))) (- y (- (modulo y (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50))))) environment)))
+                                     ((environment 'add-entity!) tower)
+                                     ((player 'set-selected-tower!) '())))
+                                 (begin (display "Not enough points!") (newline)))))))))))
       
       (((draw 'get-window) 'set-key-callback!)
        (lambda (type key)
          (if game-loop
              (if (and (eq? type 'pressed) (eq? key #\space))
-                 (begin ((draw 'draw-game-status-text)) (clean!)))))))
+                 (begin ((draw 'draw-game-status-text)) (clean!)))
+             (if (and (eq? type 'pressed) (eq? key #\m))
+                 (begin ((player 'set-points!) 99999999) ((draw 'draw-game-status-text))))))))
   
     (define (load-world!)
       (draw 'draw-world!)) ;Call draw-world! from Draw ADT
@@ -87,8 +107,17 @@
       (if (>= monster-move-time 10) ;Only move monster each 10 ms, so that it runs sort of even on every computer
           (begin (set! monster-move-time 0)
                  ((environment 'monsters-loop) ms)
-                 ((environment 'towers-loop) ms))))
-  
+                 ((environment 'towers-loop) ms)
+                 ((environment 'obstacle-process) ms)
+                 (player-process ms))))
+
+    (define (player-process ms)
+      (if (<= (player 'get-portal-timer) 0)
+          (begin
+            ((player 'set-portal-time!) 0)
+            ((draw 'remove-portal-opacity!)))
+          ((player 'portal-minus-time) ms)))
+   
     (define (dispatch mes)
       (cond ((eq? mes 'start!) (start!))
             ((eq? mes 'clean!) clean!)

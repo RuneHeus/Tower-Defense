@@ -67,5 +67,5 @@
       (make-position ((target 'get-position) 'get-x) ((target 'get-position) 'get-y))))
 
 (define (set-tile-position! tile position)
-  ((tile 'set-x!) (+ (- (/ (* (tile 'get-w) size-factor) 2) (/ (tile 'get-w) 2)) (position 'get-x)))
-  ((tile 'set-y!) (+ (- (/ (* (tile 'get-h) size-factor) 2) (/ (tile 'get-h) 2)) (position 'get-y))))
+  ((tile 'set-x!) (position 'get-x))
+  ((tile 'set-y!) (position 'get-y)))

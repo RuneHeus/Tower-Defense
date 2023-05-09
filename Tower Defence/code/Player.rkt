@@ -2,8 +2,8 @@
   (let ((health 10)
         (points 200)
         (tower-selected '())
-        (portal-timer 0)
-        (bomb-timer 0))
+        (portal-timer '())
+        (bomb-timer '()))
 
     (define (set-health! value)
       (set! health value))

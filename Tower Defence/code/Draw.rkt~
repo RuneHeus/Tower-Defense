@@ -1,6 +1,7 @@
 (define (make-draw player)
   (let* ((window (make-window width height "Tower Defense" 60))
          (background-layer ((window 'new-layer!)))
+         (power-up-layer ((window 'new-layer!)))
          (entity-layer ((window 'new-layer!)))
          (projectile-layer ((window 'new-layer!)))
          (menu-layer ((window 'new-layer!)))
@@ -13,10 +14,15 @@
          (previous-points '())
          (previous-health '())
          (game-over-tiles '()))
-    
-    (define (reposition! tile position)
-      ((tile 'set-x!) (+ (- (/ (* (tile 'get-w) size-factor) 2) (/ (tile 'get-w) 2)) (position 'get-x)))
-      ((tile 'set-y!) (+ (- (/ (* (tile 'get-h) size-factor) 2) (/ (tile 'get-h) 2)) (position 'get-y))))
+     
+    (define (reposition! tile position . offset)
+      (if (not (null? offset))
+          (begin 
+            ((tile 'set-x!) (+ (- (/ (* (tile 'get-w) size-factor) 2) (/ (tile 'get-w) 2)) (- (position 'get-x) (* 50 (car offset)))))
+            ((tile 'set-y!) (+ (- (/ (* (tile 'get-h) size-factor) 2) (/ (tile 'get-h) 2)) (- (position 'get-y) (* 50 (car offset))))))
+          (begin 
+            ((tile 'set-x!) (+ (- (/ (* (tile 'get-w) size-factor) 2) (/ (tile 'get-w) 2)) (position 'get-x)))
+            ((tile 'set-y!) (+ (- (/ (* (tile 'get-h) size-factor) 2) (/ (tile 'get-h) 2)) (position 'get-y))))))
 
     (define (draw! drawable)
       ((entity-layer 'add-drawable!) drawable))
@@ -90,7 +96,7 @@
         ;                   (begin
         ;                     ((pos-tile 'draw-line!) 0 y width y 1 "black")
         ;                     (loop pos-tile (+ y (* 50 size-factor))))))))
-        ;      
+        ;              
         ;        (define (draw-stripes-vertical!)
         ;          (let loop ((pos-tile (make-tile width height))
         ;                     (x 0))
@@ -104,8 +110,8 @@
         (draw-menu!)))
 
     (define (draw-menu!)
-      (map (lambda (tower)
-             ((menu-layer 'add-drawable!) (tower 'get-tile)))
+      (map (lambda (element)
+             ((menu-layer 'add-drawable!) (element 'get-tile)))
            menu-list)
       (map (lambda (text)
              ((menu-layer 'add-drawable!) text))
@@ -113,9 +119,21 @@
       (let ((tile (make-tile width height))
             (tower-text (make-tile width height)))
         ((tile 'draw-rectangle!) (* 600 size-factor) (* 100 size-factor) (* 700 size-factor) (* 300 size-factor) "brown")
-        ((tower-text 'draw-text!) "Towers" (* size-factor 20) (* size-factor 650) (* size-factor 120) "white")
+        ((tower-text 'draw-text!) "Towers" (* size-factor 20) (* size-factor 650) (* size-factor 100) "white")
+        ((tower-text 'draw-text!) "Power-Ups" (* size-factor 17) (* size-factor 650) (* size-factor 250) "white")
         ((menu-layer 'add-drawable!) tower-text)
         ((menu-layer 'add-drawable!) tile)))
+
+    (define (add-portal-opacity!)
+      ((menu-layer 'remove-drawable!) (portal 'get-tile))
+      ((portal 'set-tile!) (make-tile image-size image-size portal-img-50 portal-mask-50))
+      (set-tile-position! (portal 'get-tile) portal-pos)
+      ((menu-layer 'add-drawable!) (portal 'get-tile)))
+
+    (define (remove-portal-opacity!)
+      ((menu-layer 'remove-drawable!) (portal 'get-tile))
+      ((portal 'set-tile!) (make-tile image-size image-size portal-img portal-maks))
+      ((menu-layer 'add-drawable!) (portal 'get-tile)))
 
 
     (define (dispatch mes)
@@ -137,5 +155,8 @@
             ((eq? mes 'remove-previous-text!) remove-previous-text!)
             ((eq? mes 'draw-game-over-screen!) draw-game-over-screen!)
             ((eq? mes 'remove-game-over-screen!) remove-game-over-screen!)
+            ((eq? mes 'get-power-up-layer) power-up-layer)
+            ((eq? mes 'add-portal-opacity!) add-portal-opacity!)
+            ((eq? mes 'remove-portal-opacity!) remove-portal-opacity!)
             (else (display "Error: Wrong dispatch message (Draw.rkt) ") (display mes))))
     dispatch))
