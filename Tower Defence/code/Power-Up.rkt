@@ -9,7 +9,7 @@
     
     (case type
       ("portal" (begin
-                  (set! tile (make-tile image-size image-size portal-img portal-maks))
+                  (set! tile (make-tile image-size image-size portal-img portal-mask))
                   (set! position portal-pos)
                   (if (null? dummy?)
                       (begin

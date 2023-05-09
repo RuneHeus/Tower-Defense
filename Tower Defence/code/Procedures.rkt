@@ -26,6 +26,10 @@
           (remove-el-from-list el (cdr list))
           (cons (car list) (remove-el-from-list el (cdr list))))))
 
+(define (println string)
+  (display string)
+  (newline))
+
 (define (add-element-to-list element lst)
   (if (null? lst)
       (list element)
@@ -61,3 +65,7 @@
 (define (create-target-pos target)
   (if (not (null? target))
       (make-position ((target 'get-position) 'get-x) ((target 'get-position) 'get-y))))
+
+(define (set-tile-position! tile position)
+  ((tile 'set-x!) (+ (- (/ (* (tile 'get-w) size-factor) 2) (/ (tile 'get-w) 2)) (position 'get-x)))
+  ((tile 'set-y!) (+ (- (/ (* (tile 'get-h) size-factor) 2) (/ (tile 'get-h) 2)) (position 'get-y))))

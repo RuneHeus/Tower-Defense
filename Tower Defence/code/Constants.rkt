@@ -56,10 +56,13 @@
 
 ;--------------------------Power-Up--------------------------------------
 (define portal-img "../images/Power-ups/portal.png")
-(define portal-maks "../images/Power-ups/portal_mask.png")
+(define portal-img-50 "../images/Power-ups/portal-50.png")
+(define portal-mask "../images/Power-ups/portal_mask.png")
+(define portal-mask-50 "../images/Power-ups/portal-50_mask.png")
 (define portal-copy-img "../images/Power-ups/portal-alt.png")
 (define portal-copy-maks "../images/Power-ups/portal-alt_mask.png")
 (define bomb-img "../images/Power-ups/bomb.png")
+(define bomb-img-50 "../images/Power-ups/bomb-50.png")
 (define bomb-mask "../images/Power-ups/bomb_mask.png")
 (define explosion-img "../images/Power-ups/explosion.png")
 (define explosion-mask "../images/Power-ups/explosion_mask.png")

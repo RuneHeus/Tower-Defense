@@ -48,9 +48,7 @@
                     (begin
                       (if obstacle? ;Is the projectile a obstacle?
                           (set-move! #f))
-                      ((target 'hit!) damage)
-                      (if (or (<= timer 0) (not obstacle?))
-                          (remove-projectile)))))
+                      ((target 'hit!) damage))))
             (if ((position 'outside-playarea?) width height)
                 (remove-projectile)
                 (begin

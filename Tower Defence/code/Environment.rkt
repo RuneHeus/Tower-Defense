@@ -161,12 +161,12 @@
       (if (eq? (obstacle 'get-type) "portal")
           (((draw 'get-power-up-layer) 'add-drawable!) (obstacle 'get-portal-copy))))
     
-    (define (check-new-obstacles-tower)
+    (define (check-new-obstacles-tower) ;Check if a tower has a obstacle as projectile
       (map (lambda (tower)
              (let ((projectile (tower 'get-projectile)))
                (if projectile
                    (if (projectile 'obstacle?)
-                       (if (not (memq projectile obstacles))
+                       (if (not (memq projectile obstacles)) ;If the found obstacle is not part of the existing obstacle list
                            (add-obstacle projectile))))))
            towers))
     
@@ -186,7 +186,8 @@
              (begin
                (remove-obstacle! obstacle)
                (((draw 'get-power-up-layer) 'remove-drawable!) (obstacle 'get-tile))
-               (((draw 'get-power-up-layer) 'remove-drawable!) (obstacle 'get-portal-copy)))
+               (if (eq? (obstacle 'get-type) "portal")
+                   (((draw 'get-power-up-layer) 'remove-drawable!) (obstacle 'get-portal-copy))))
              (if (<= (obstacle 'get-timer) 500)
                  (if (eq? (obstacle 'get-type) "bomb")
                      (begin

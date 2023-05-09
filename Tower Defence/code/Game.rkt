@@ -63,11 +63,18 @@
                                   (set! menu-clicked #t)
                                   (if (eq? ((car item) 'entity?) 'power-up)
                                       (if (eq? ((car item) 'get-type) "bomb")
-                                          (let ((rand-amount (random 1 5)))
-                                            (do ((i 0 (+ i 1)))
-                                              ((= i rand-amount))
-                                              ((environment 'add-obstacle) (make-power-up ((car item) 'get-type) path))))
-                                          ((environment 'add-obstacle) (make-power-up ((car item) 'get-type) path)))
+                                          (if (= (player 'get-bomb-timer) 0)
+                                              (begin
+                                                ((player 'set-bomb-time!) 5000)
+                                                (let ((rand-amount (random 1 5)))
+                                                  (do ((i 0 (+ i 1)))
+                                                    ((= i rand-amount))
+                                                    ((environment 'add-obstacle) (make-power-up ((car item) 'get-type) path))))))
+                                          (if (= (player 'get-portal-timer) 0)
+                                              (begin
+                                                ((player 'set-portal-time!) 5000)
+                                                ((draw 'add-portal-opacity!))
+                                                ((environment 'add-obstacle) (make-power-up ((car item) 'get-type) path)))))
                                       ((player 'set-selected-tower!) (car item))))))
                           menu-positions)
                      (if (not menu-clicked)
@@ -101,8 +108,16 @@
           (begin (set! monster-move-time 0)
                  ((environment 'monsters-loop) ms)
                  ((environment 'towers-loop) ms)
-                 ((environment 'obstacle-process) ms))))
-  
+                 ((environment 'obstacle-process) ms)
+                 (player-process ms))))
+
+    (define (player-process ms)
+      (if (<= (player 'get-portal-timer) 0)
+          (begin
+            ((player 'set-portal-time!) 0)
+            ((draw 'remove-portal-opacity!)))
+          ((player 'portal-minus-time) ms)))
+   
     (define (dispatch mes)
       (cond ((eq? mes 'start!) (start!))
             ((eq? mes 'clean!) clean!)

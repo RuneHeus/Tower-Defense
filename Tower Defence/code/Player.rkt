@@ -1,7 +1,9 @@
 (define (make-player)
   (let ((health 10)
         (points 200)
-        (tower-selected '()))
+        (tower-selected '())
+        (portal-timer 0)
+        (bomb-timer 0))
 
     (define (set-health! value)
       (set! health value))
@@ -26,6 +28,18 @@
       (set-points! 200)
       (set-selected-tower! '()))
 
+    (define (portal-minus-time time)
+      (set! portal-timer (- portal-timer time)))
+
+    (define (set-portal-time! time)
+      (set! portal-timer time))
+
+    (define (bomb-minus-time time)
+      (set! bomb-timer (- bomb-timer time)))
+
+    (define (set-bomb-time! time)
+      (set! bomb-timer time))
+
     (define (dispatch mes)
       (cond ((eq? mes 'set-health!) set-health!)
             ((eq? mes 'damage!) damage!)
@@ -38,5 +52,11 @@
             ((eq? mes 'get-points) points)
             ((eq? mes 'reset!) reset!)
             ((eq? mes 'set-points!) set-points!)
+            ((eq? mes 'portal-minus-time) portal-minus-time)
+            ((eq? mes 'set-portal-time!) set-portal-time!)
+            ((eq? mes 'bomb-minus-time) bomb-minus-time)
+            ((eq? mes 'set-bomb-time!) set-bomb-time!)
+            ((eq? mes 'get-portal-timer) portal-timer)
+            ((eq? mes 'get-bomb-timer) bomb-timer)
             (else (display "Error: Wrong dispatch message (Player.rkt) -> ") (display mes))))
     dispatch))

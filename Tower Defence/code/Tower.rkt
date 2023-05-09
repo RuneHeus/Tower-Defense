@@ -35,13 +35,6 @@
       ((tile 'set-x!) (+ (- (/ (* (tile 'get-w) size-factor) 2) (/ (tile 'get-w) 2)) (position 'get-x)))
       ((tile 'set-y!) (+ (- (/ (* (tile 'get-h) size-factor) 2) (/ (tile 'get-h) 2)) (position 'get-y))))
 
-    (define (generate-area) ;This is called at the making of the tower, and are all the surrounding squares wich makes its area
-      (do ((y (- (position 'get-y) (* size-factor 50)) (+ y (* size-factor 50))))
-        ((> y (+ (position 'get-y) (* size-factor 50))))
-        (do ((x (- (position 'get-x) (* size-factor 50)) (+ x (* size-factor 50))))
-          ((> x (+ (position 'get-x) (* size-factor 50))))
-          (set! area (append area (list (make-position x y)))))))
-
     (define (check-area monster)
       (if (or (not target) (eq? monster target));Checks if a monster is in its area or not, if there is a monster in the area but the tower already has a target, than this monster will be ignored
           (let* ((x ((monster 'get-position) 'get-x))
@@ -60,7 +53,7 @@
           (set! target #f)))
     
     (define (shoot!)
-      (if target
+      (if target ;If the tower has a target
           (begin 
             (if (= cooldown 0)
                 (if projectile

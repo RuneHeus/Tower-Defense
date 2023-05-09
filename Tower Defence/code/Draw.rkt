@@ -124,6 +124,17 @@
         ((menu-layer 'add-drawable!) tower-text)
         ((menu-layer 'add-drawable!) tile)))
 
+    (define (add-portal-opacity!)
+      ((menu-layer 'remove-drawable!) (portal 'get-tile))
+      ((portal 'set-tile!) (make-tile image-size image-size portal-img-50 portal-mask-50))
+      (set-tile-position! (portal 'get-tile) portal-pos)
+      ((menu-layer 'add-drawable!) (portal 'get-tile)))
+
+    (define (remove-portal-opacity!)
+      ((menu-layer 'remove-drawable!) (portal 'get-tile))
+      ((portal 'set-tile!) (make-tile image-size image-size portal-img portal-maks))
+      ((menu-layer 'add-drawable!) (portal 'get-tile)))
+
 
     (define (dispatch mes)
       (cond ((eq? mes 'draw!) draw!)
@@ -145,5 +156,7 @@
             ((eq? mes 'draw-game-over-screen!) draw-game-over-screen!)
             ((eq? mes 'remove-game-over-screen!) remove-game-over-screen!)
             ((eq? mes 'get-power-up-layer) power-up-layer)
+            ((eq? mes 'add-portal-opacity!) add-portal-opacity!)
+            ((eq? mes 'remove-portal-opacity!) remove-portal-opacity!)
             (else (display "Error: Wrong dispatch message (Draw.rkt) ") (display mes))))
     dispatch))
