@@ -23,8 +23,18 @@
       ("bomb" (begin
                 (set! tile (make-tile net-image-size net-image-size bomb-img bomb-mask))
                 (set! obstacle? #t)
-                (set! damage (random 1 3))
-                (set! behaviour (lambda (monster) ((monster 'hit!) damage)))))) ;Random 1 or 2
+                (set! damage 0)
+                (set! timer 5000)
+                (set! behaviour (lambda (monsters dmg ms draw)
+                                  (((draw 'get-power-up-layer) 'remove-drawable!) tile)
+                                  (set-tile! (make-tile explosion-size explosion-size explosion-img explosion-mask))
+                                  ((draw 'reposition!) tile position 2)
+                                  (((draw 'get-power-up-layer) 'add-drawable!) tile)
+                                  (map (lambda (monster)
+                                         (if ((position 'in-area?) (monster 'get-position) explosion-range)
+                                             ((monster 'hit!) dmg)))
+                                       monsters)
+                                  (minus-timer ms)))))) ;Random 1 or 2
 
     (define (set-scale) ;This sets the scale of projectile
       ((tile 'set-scale!) size-factor)
@@ -66,6 +76,10 @@
 
     (define (set-move! val)
       (set! move? val))
+
+    (define (set-tile! new)
+      (set! tile new))
+
     
     (define (dispatch mes)
       (cond ((eq? mes 'get-tile) tile)
@@ -79,6 +93,7 @@
             ((eq? mes 'get-move) move?)
             ((eq? mes 'set-move!) set-move!)
             ((eq? mes 'get-type) type)
+            ((eq? mes 'set-tile!) set-tile!)
             (else (display "Error: Wrong dispatch message (Projectile.rkt) -> ") (display mes))))
     (set-scale)
     (if (not (null? target))

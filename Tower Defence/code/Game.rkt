@@ -2,7 +2,7 @@
 (load "Monster.rkt")
 (#%require (only racket/base random))
 
-(define (make-game environment wave player draw)
+(define (make-game environment wave player draw path)
 
   (let ((monster-spawn-time 0)
         (monster-move-time 0)
@@ -70,7 +70,7 @@
                                                 (let ((rand-amount (random 1 5)))
                                                   (do ((i 0 (+ i 1)))
                                                     ((= i rand-amount))
-                                                    ((environment 'add-obstacle) (make-power-up ((car item) 'get-type) path))))))
+                                                    ((environment 'add-obstacle) (make-projectile ((car item) 'get-type) ((path'random-pos-on-path)) '() '()))))))
                                           (if (null? (player 'get-portal-timer))
                                               (begin
                                                 ((player 'set-portal-time!) 10000)

@@ -1,4 +1,4 @@
-(#%require (only racket/base sleep))
+(#%require (only racket/base random))
 
 (define (make-environment draw path player)
 
@@ -192,18 +192,12 @@
                    (((draw 'get-power-up-layer) 'remove-drawable!) (obstacle 'get-portal-copy))))
              (if (<= (obstacle 'get-timer) 500)
                  (if (eq? (obstacle 'get-type) "bomb")
-                     (begin
-                       (((draw 'get-power-up-layer) 'remove-drawable!) (obstacle 'get-tile))
-                       ((obstacle 'set-tile!) (make-tile explosion-size explosion-size explosion-img explosion-mask))
-                       ((draw 'reposition!) (obstacle 'get-tile) (obstacle 'get-position) 2)
-                       (((draw 'get-power-up-layer) 'add-drawable!) (obstacle 'get-tile))
-                       (map (lambda (monster)
-                              (if (((obstacle 'get-position) 'in-area?) (monster 'get-position) explosion-range)
-                                  ((obstacle 'get-behaviour) monster)))
-                            monsters)
-                       ((obstacle 'minus-time!) ms)))))
+                     (bomb-explosion! obstacle ms))))
          ((obstacle 'minus-time!) ms))
        obstacles))
+
+    (define (bomb-explosion! obstacle ms)
+      ((obstacle 'get-behaviour) monsters (random 1 3) ms draw))
 
     (define (set-towers! val)
       (set! towers val))

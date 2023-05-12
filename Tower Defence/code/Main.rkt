@@ -19,6 +19,6 @@
 
 (define Wave (make-wave Environment))
 
-(define Game (make-game Environment Wave Player Draw))
+(define Game (make-game Environment Wave Player Draw Path))
 
 (Game 'start!) ;Start the game

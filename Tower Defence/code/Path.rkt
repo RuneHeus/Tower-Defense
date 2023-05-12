@@ -35,6 +35,11 @@
               ((and (= (object-pos 'get-y) ((car lijst) 'get-y)) (= (object-pos 'get-y) ((cadr lijst) 'get-y)))
                (and (>= (object-pos 'get-x) ((car lijst) 'get-x)) (<= (object-pos 'get-x) ((cadr lijst) 'get-x))))
               (else (loop (cdr lijst) object-pos)))))
+
+    (define (random-pos-on-path)
+      (let* ((random-pos (pick-random-from-list path-positions end-position))
+             (next-pos (next-path-to-pos random-pos)))
+        (random-pos-between-points random-pos next-pos)))
   
     (define (dispatch mes)
       (cond ((eq? mes 'start-position) start-position)
@@ -45,5 +50,6 @@
             ((eq? mes 'next-pos-to-far?) next-pos-to-far?)
             ((eq? mes 'on-path?) on-path?)
             ((eq? mes 'get-path1) path1)
+            ((eq? mes 'random-pos-on-path) random-pos-on-path)
             (else (display "Error: Wrong dispatch message (Path.rkt)"))))
     dispatch))

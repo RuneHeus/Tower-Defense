@@ -16,19 +16,21 @@
         (cost 100))
 
     (case type
-      (4 (begin
+      (4 (begin ;Net Tower
            (set! tile (make-tile image-size image-size net-tower-img net-tower-mask))
            (set! projectile-type "net")
            (set! cooldown-time 3000)
            (set! cost 100)))
 
-      (5 (begin
+      (5 (begin ;8 Shooter tower
            (set! tile (make-tile image-size image-size bullet-tower-img bullet-tower-mask))
-           (set! check-area? #f)
            (set! cost 200)))
 
-      (6 (begin
-           (set! tile (make-tile image-size image-size bom-tower-img bom-tower-mask)))))
+      (6 (begin ;Bomb Tower
+           (set! tile (make-tile image-size image-size bom-tower-img bom-tower-mask))
+           (set! projectile-type "bomb")
+           (set! cooldown-time 5000)
+           (set! cost 200))))
    
     (define (set-scale!) ;This sets the scale of the tower
       ((tile 'set-scale!) size-factor)
