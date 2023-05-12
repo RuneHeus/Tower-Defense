@@ -64,6 +64,7 @@
 (define bomb-img "../images/Power-ups/bomb.png")
 (define bomb-img-50 "../images/Power-ups/bomb-50.png")
 (define bomb-mask "../images/Power-ups/bomb_mask.png")
+(define bomb-mask-50 "../images/Power-ups/bomb-50_mask.png")
 (define explosion-img "../images/Power-ups/explosion.png")
 (define explosion-mask "../images/Power-ups/explosion_mask.png")
 (define explosion-range 3)

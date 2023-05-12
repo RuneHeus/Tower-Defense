@@ -13,7 +13,7 @@
                  (set! monsters (append monsters (list entity))))
              (draw-entity! entity))
             ((eq? (entity 'entity?) 'tower)
-             (if (and (free-position? entity) (not (on-path? entity)))
+             (if (and (free-position? entity) (not ((path 'on-path?) entity)))
                  (begin (if (null? towers)
                             (set! towers (list entity))
                             (set! towers (append towers (list entity))))
@@ -71,6 +71,9 @@
          (((draw 'entity-layer) 'remove-drawable!) (obstacle 'get-tile)))
        obstacles))
 
+    (define (remove-obstacle! obstacle)
+      (set! obstacles (remove-el-from-list obstacle obstacles)))
+
     (define (remove-all-objects!)
       (remove-all-monsters!)
       (remove-all-towers!)
@@ -87,20 +90,23 @@
     (define (set-new-increment! monster)
       (let ((monster-pos (monster 'get-position))
             (move-monster? #t) ;Is the monster allowed to move?
-            (next-pos (next-pos-path monster)) ;The next path position from the monster
-            (obstacle? (object-eq-pos-obstacles? monster obstacles))) ;Is the monster close enough to a obstacle?
+            (next-pos ((path 'next-path-to-pos) (monster 'get-last-path-position))) ;The next path position from the monster
+            (obstacle? (object-eq-pos-obstacles? monster obstacles)));Is the monster close enough to a obstacle?
         (define (loop paths) ;Loop through all the path positions
           (if ((monster 'endpoint?))
-              (begin (remove-monster! monster "End") ((draw 'draw-game-status-text)))
+              (begin
+                (remove-monster! monster "End")
+                ((draw 'draw-game-status-text)))
               (if (not (null? paths))
                   (begin
                     (if obstacle? ;If the monster is at in range of a obstacle
-                        ((obstacle? 'get-behaviour) monster))
+                        (if (not (eq? (obstacle? 'get-type) "bomb"))
+                            ((obstacle? 'get-behaviour) monster)))
                     (if ((monster-pos 'equal?) (car paths))
-                        (begin 
+                        (begin
                           ((monster 'set-angle!) (atan (- ((cadr paths) 'get-y) (monster-pos 'get-y)) (- ((cadr paths) 'get-x) (monster-pos 'get-x))))
                           ((monster 'set-last-path-position!) (car paths)))
-                        (if (next-pos-to-far? monster next-pos) ;Is the monster going to overshoot the next path position?
+                        (if ((path 'next-pos-to-far?) monster next-pos) ;Is the monster going to overshoot the next path position?
                             (begin
                               ((monster-pos 'change-coordinates!) (next-pos 'get-x) (next-pos 'get-y))
                               ((draw 'reposition!) (monster 'get-tile) (monster 'get-position))
@@ -108,28 +114,13 @@
                     (loop (cdr paths))))))
         (loop (path 'path-positions))
         move-monster?))
-
-    (define (next-pos-path monster)
-      (define (loop paths)
-        (if (not (null? paths))
-            (if (((monster 'get-last-path-position) 'equal?) (car paths))
-                (car (cdr paths))
-                (loop (cdr paths)))
-            '()))
-      (if (null? (monster 'get-last-path-position))
-          (car (path 'path-positions))
-          (loop (path 'path-positions))))
-
-    (define (next-pos-to-far? monster position);If the increment for the next position is greater than the position of the path, then the code wont recognize that he passed that position, so with this code it fixes that
-      (and (>= (+ ((monster 'get-position) 'get-x) (round (* (monster 'get-speed) (cos (monster 'get-angle))))) (position 'get-x))
-           (>= (+ ((monster 'get-position) 'get-y) (round (* (monster 'get-speed) (sin (monster 'get-angle))))) (position 'get-y))))
   
     (define (monsters-loop ms)
       (map (lambda (monster)
              (if (<= (monster 'get-health) 0)
                  (begin
                    (case (monster 'get-type)
-                     ("Purple" ((monster 'on-death) monsters (next-pos-path monster)))
+                     ("Purple" ((monster 'on-death) monsters ((path 'next-path-to-pos) (monster 'get-last-path-position) )))
                      ("Gray" (add-entity! (make-monster "Red" (make-position (start-position 'get-x) (start-position 'get-y))))
                              (add-entity! (make-monster "Red" (make-position (start-position 'get-x) (start-position 'get-y))))))
                    (remove-monster! monster "Death")
@@ -146,10 +137,10 @@
                            ((monster 'set-infection!) (- (monster 'get-infection) ms)))))))
            monsters))
 
-    (define (free-position? tower)
+    (define (free-position? tower) ;Checks if there already is a tower in the position
       (let loop ((lijst towers))
         (cond ((null? lijst) #t)
-              ((or ((((car lijst) 'get-position) 'equal?) (tower 'get-position)) (on-path? tower)) #f)
+              ((or ((((car lijst) 'get-position) 'equal?) (tower 'get-position)) ((path 'on-path?) tower)) #f)
               (else (loop (cdr lijst))))))
   
     (define (on-path? tower)
@@ -165,14 +156,17 @@
     (define (add-obstacle obstacle)
       (if (null? obstacles)
           (set! obstacles (list obstacle))
-          (set! obstacles (append obstacles (list obstacle)))))
+          (set! obstacles (append obstacles (list obstacle))))
+      (((draw 'get-power-up-layer) 'add-drawable!) (obstacle 'get-tile))
+      (if (eq? (obstacle 'get-type) "portal")
+          (((draw 'get-power-up-layer) 'add-drawable!) (obstacle 'get-portal-copy))))
     
-    (define (check-new-obstacles-tower)
+    (define (check-new-obstacles-tower) ;Check if a tower has a obstacle as projectile
       (map (lambda (tower)
              (let ((projectile (tower 'get-projectile)))
                (if projectile
                    (if (projectile 'obstacle?)
-                       (if (not (memq projectile obstacles))
+                       (if (not (memq projectile obstacles)) ;If the found obstacle is not part of the existing obstacle list
                            (add-obstacle projectile))))))
            towers))
     
@@ -184,6 +178,30 @@
              (if (tower 'check-area?)
                  (check-new-obstacles-tower)))
            towers))
+
+    (define (obstacle-process ms)
+      (map
+       (lambda (obstacle)
+         (if (<= (obstacle 'get-timer) 0)
+             (begin
+               (remove-obstacle! obstacle)
+               (((draw 'get-power-up-layer) 'remove-drawable!) (obstacle 'get-tile))
+               (if (eq? (obstacle 'get-type) "portal")
+                   (((draw 'get-power-up-layer) 'remove-drawable!) (obstacle 'get-portal-copy))))
+             (if (<= (obstacle 'get-timer) 500)
+                 (if (eq? (obstacle 'get-type) "bomb")
+                     (begin
+                       (((draw 'get-power-up-layer) 'remove-drawable!) (obstacle 'get-tile))
+                       ((obstacle 'set-tile!) (make-tile explosion-size explosion-size explosion-img explosion-mask))
+                       ((draw 'reposition!) (obstacle 'get-tile) (obstacle 'get-position) 2)
+                       (((draw 'get-power-up-layer) 'add-drawable!) (obstacle 'get-tile))
+                       (map (lambda (monster)
+                              (if (((obstacle 'get-position) 'in-area?) (monster 'get-position) explosion-range)
+                                  ((obstacle 'get-behaviour) monster)))
+                            monsters)
+                       ((obstacle 'minus-time!) ms)))))
+         ((obstacle 'minus-time!) ms))
+       obstacles))
 
     (define (set-towers! val)
       (set! towers val))
@@ -202,9 +220,12 @@
               ((tower 'set-cooldown!) 0)
               ((tower 'set-cooldown!) (- (tower 'cooldown) ms))))
       (if (tower 'get-projectile)
-          (if (<= ((tower 'get-projectile) 'get-cooldown) 0)
-              (((tower 'get-projectile) 'remove-projectile))
-              (((tower 'get-projectile) 'minus-cooldown) ms))))
+          (if (<= ((tower 'get-projectile) 'get-timer) 0)
+              (begin
+                (if ((tower 'get-projectile) 'obstacle?)
+                    (set! obstacles (remove-el-from-list (tower 'get-projectile) obstacles)))
+                (((tower 'get-projectile) 'remove-projectile)))
+              (((tower 'get-projectile) 'minus-time!) ms))))
 
     (define (monster-random-event)
       (map (lambda (monster)
@@ -233,5 +254,6 @@
             ((eq? mes 'set-obstacles!) set-obstacles!)
             ((eq? mes 'get-obstacles) obstacles)
             ((eq? mes 'clean-environment!) clean-environment!)
+            ((eq? mes 'obstacle-process) obstacle-process)
             (else (display "Error: Wrong dispatch message (Environment.rkt) -> ") (display mes))))
     dispatch))

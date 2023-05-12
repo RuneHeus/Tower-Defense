@@ -26,7 +26,9 @@
     (define (reset!)
       (set-health! 10)
       (set-points! 200)
-      (set-selected-tower! '()))
+      (set-selected-tower! '())
+      (set! portal-timer '())
+      (set! bomb-timer '()))
 
     (define (portal-minus-time time)
       (set! portal-timer (- portal-timer time)))

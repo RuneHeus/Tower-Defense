@@ -15,16 +15,16 @@
          (if (and (eq? type 'pressed) (eq? key #\s))
              (clean!)))))
 
-    (define (clean!)
-      ((draw 'remove-previous-text!))
-      ((draw 'remove-game-over-screen!))
+    (define (reset!)
       (set! monster-spawn-time 0)
-      (set! monster-move-time 0)
+      (set! monster-move-time 0))
+    
+    (define (clean!)
+      (reset!)
       ((player 'reset!))
-      ((environment 'clean-environment!))
-      ((draw 'remove-start-text!))
+      ((environment 'reset!))
+      ((draw 'reset!))
       ((wave 'start-wave!))
-      ((draw 'draw-game-status-text))
       (load-world!)
       (game-loop))
 
@@ -63,9 +63,10 @@
                                   (set! menu-clicked #t)
                                   (if (eq? ((car item) 'entity?) 'power-up)
                                       (if (eq? ((car item) 'get-type) "bomb")
-                                          (if (= (player 'get-bomb-timer) 0)
+                                          (if (null? (player 'get-bomb-timer))
                                               (begin
-                                                ((player 'set-bomb-time!) 5000)
+                                                ((player 'set-bomb-time!) 10000)
+                                                ((draw 'add-bomb-opacity!))
                                                 (let ((rand-amount (random 1 5)))
                                                   (do ((i 0 (+ i 1)))
                                                     ((= i rand-amount))
@@ -117,7 +118,13 @@
               (begin
                 ((player 'set-portal-time!) '())
                 ((draw 'remove-portal-opacity!)))
-              ((player 'portal-minus-time) ms))))
+              ((player 'portal-minus-time) ms)))
+      (if (not (null? (player 'get-bomb-timer)))
+          (if (<= (player 'get-bomb-timer) 0)
+              (begin
+                ((player 'set-bomb-time!) '())
+                ((draw 'remove-bomb-opacity!)))
+              ((player 'bomb-minus-time) ms))))
    
     (define (dispatch mes)
       (cond ((eq? mes 'start!) (start!))

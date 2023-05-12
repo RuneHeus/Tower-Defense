@@ -68,7 +68,9 @@
     (define (remove-all-obstacles!)
       (map
        (lambda (obstacle)
-         (((draw 'entity-layer) 'remove-drawable!) (obstacle 'get-tile)))
+         (if (eq? (obstacle 'get-type) "portal")
+             (((draw 'get-power-up-layer) 'remove-drawable!) (obstacle 'get-portal-copy)))
+         (((draw 'get-power-up-layer) 'remove-drawable!) (obstacle 'get-tile)))
        obstacles))
 
     (define (remove-obstacle! obstacle)
@@ -80,7 +82,7 @@
       (remove-all-projectiles!)
       (remove-all-obstacles!))
 
-    (define (clean-environment!)
+    (define (reset!)
       (remove-all-objects!)
       (set-monsters! '())
       (set-towers! '())
@@ -253,7 +255,7 @@
             ((eq? mes 'add-obstacle) add-obstacle)
             ((eq? mes 'set-obstacles!) set-obstacles!)
             ((eq? mes 'get-obstacles) obstacles)
-            ((eq? mes 'clean-environment!) clean-environment!)
+            ((eq? mes 'reset!) reset!)
             ((eq? mes 'obstacle-process) obstacle-process)
             (else (display "Error: Wrong dispatch message (Environment.rkt) -> ") (display mes))))
     dispatch))
