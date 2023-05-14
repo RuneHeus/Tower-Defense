@@ -27,20 +27,6 @@
                                     ((monster 'set-last-path-position!) start-position)
                                     ((monster 'set-angle!) (atan (- ((path 'get-path1) 'get-y) ((monster 'get-position) 'get-y)) (- ((path 'get-path1) 'get-x) ((monster 'get-position) 'get-x))))
                                     ))))
-      ("bomb" (begin
-                (if (null? dummy?)
-                    (begin
-                      (let* ((random-pos (pick-random-from-list (path 'path-positions) end-position))
-                             (next-pos ((path 'next-path-to-pos) random-pos))
-                             (bomb '()))
-                        (set! position (random-pos-between-points random-pos next-pos))
-                        (set! bomb (make-projectile "bomb" position '() '() ))
-                        (set! tile (bomb 'get-tile))
-                        (set! behaviour (bomb 'get-behaviour))
-                        (set! timer (bomb 'get-timer))))
-                    (begin
-                      (set! tile ((make-projectile "bomb" bomb-pos '() '()) 'get-tile))
-                      (set! position bomb-pos)))))
       (else "Wrong type selected!"))
 
     (define (set-scale!) ;This sets the scale of the tower

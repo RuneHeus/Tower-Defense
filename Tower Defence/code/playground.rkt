@@ -1,4 +1,4 @@
 (#%require "Graphics.rkt")
 (#%require (only racket/base random))
 
-(generate-mask "../images/Power-ups/bomb-50.png" "white")
+(generate-mask "../images/Towers/tower6.png" "white")

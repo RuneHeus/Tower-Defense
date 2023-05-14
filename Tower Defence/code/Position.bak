@@ -12,8 +12,10 @@
     (define (equal? position)
       (and (= x (position 'get-x)) (= y (position 'get-y))))
 
-    (define (in-area? position)
-      (and (>= x (position 'get-x)) (>= y (position 'get-y))))
+    (define (in-area? entity-pos range)
+      (and
+       (and (>= (entity-pos 'get-x) (- x (* 50 range))) (>= (entity-pos 'get-y) (- y (* 50 range))))
+       (and (<= (entity-pos 'get-x) (+ x (* 50 range))) (<= (entity-pos 'get-y) (+ y (* 50 range))))))
 
     (define (change-coordinates! num1 num2)
       (set! x num1)
@@ -21,7 +23,7 @@
 
     (define (close-enough? target-pos)
       (let ((distance (sqrt (+ (expt (- (target-pos 'get-x) x) 2) (expt (- (target-pos 'get-y) y) 2)))))
-        (< distance 10)))
+        (< distance 20)))
 
     (define (outside-playarea? area-pos-x area-pos-y)
       (or (> x area-pos-x) (> y area-pos-y) (< x 0) (< y 0)))

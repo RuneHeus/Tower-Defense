@@ -23,7 +23,7 @@
 
     (define (close-enough? target-pos)
       (let ((distance (sqrt (+ (expt (- (target-pos 'get-x) x) 2) (expt (- (target-pos 'get-y) y) 2)))))
-        (< distance 20)))
+        (< distance 30)))
 
     (define (outside-playarea? area-pos-x area-pos-y)
       (or (> x area-pos-x) (> y area-pos-y) (< x 0) (< y 0)))

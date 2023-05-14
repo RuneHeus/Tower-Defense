@@ -176,9 +176,7 @@
       (map (lambda (tower)
              (towers-shoot tower)
              (calculate-cooldown tower ms)
-             (check-tower-areas tower)
-             (if (tower 'check-area?)
-                 (check-new-obstacles-tower)))
+             (check-tower-areas tower))
            towers))
 
     (define (obstacle-process ms)

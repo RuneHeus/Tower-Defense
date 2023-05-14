@@ -107,7 +107,7 @@
 
 ;--------------bomb-------------------------------------------------------------------
 (define bomb-pos (make-position 700 300))
-(define bomb (make-power-up "bomb" "Dummy path" "Dummy environment" "Dummy")) ;This is a dummy bomb
+(define bomb (make-projectile "bomb" bomb-pos 'Dummy-target 'Dummy-tower)) ;This is a dummy bomb
 ;---------------------------------------------------------------------------------------
 
 (define menu-list (list tower1 tower4 tower5 tower6 portal bomb))

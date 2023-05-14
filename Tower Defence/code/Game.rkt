@@ -42,6 +42,8 @@
        (lambda (ms)
          (if game-loop-status
              (begin
+               (if (null? (environment 'get-monsters))
+                   ((wave 'set-wave-ready!) #t))
                (if (<= (player 'get-health) 0)
                    (begin
                      (stop!)
@@ -92,10 +94,14 @@
       (((draw 'get-window) 'set-key-callback!)
        (lambda (type key)
          (if game-loop
-             (if (and (eq? type 'pressed) (eq? key #\space))
-                 (begin ((draw 'draw-game-status-text)) (clean!)))
-             (if (and (eq? type 'pressed) (eq? key #\m))
-                 (begin ((player 'set-points!) 99999999) ((draw 'draw-game-status-text))))))))
+             (begin 
+               (if (and (eq? type 'pressed) (eq? key #\space))
+                   (begin ((draw 'draw-game-status-text)) (clean!)))
+               (if (and (eq? type 'pressed) (eq? key #\w))
+                   (if (wave 'wave-ready?)
+                       ((wave 'load-wave!)))))
+             (if (and (eq? type 'pressed) (eq? key #\o))
+                 (begin (display "Test") ((player 'set-points!) 99999999) ((draw 'draw-game-status-text))))))))
   
     (define (load-world!)
       (draw 'draw-world!)) ;Call draw-world! from Draw ADT

@@ -56,14 +56,15 @@
     
     (define (shoot!)
       (if target ;If the tower has a target
-          (begin 
+          (begin
             (if (= cooldown 0)
                 (if projectile
                     ((projectile 'move!)) ;If projectile exists, move it
                     (begin
-                      (set-projectile! (make-projectile projectile-type (make-position (position 'get-x) (position 'get-y)) target dispatch))
-                      ((((environment 'draw) 'projectile-layer) 'add-drawable!) (projectile 'get-tile))
-                      (set! cooldown cooldown-time)))
+                      (let ((new-projectile (make-projectile projectile-type (make-position (position 'get-x) (position 'get-y)) target dispatch)))
+                        (set-projectile! new-projectile)
+                        ((((environment 'draw) 'projectile-layer) 'add-drawable!) (projectile 'get-tile))
+                        (set! cooldown cooldown-time))))
                 (if projectile
                     ((projectile 'move!)))))
           (if projectile
@@ -89,7 +90,7 @@
             ((eq? mes 'remove-target) remove-target)
             ((eq? mes 'check-area?) check-area?)
             ((eq? mes 'get-cost) cost)
-            ((eq? mes 'get-type) type)))
+            ((eq? mes 'get-type) type)
+            ((eq? mes 'get-environment) environment)))
     (set-scale!)
-    ;(generate-area)
     dispatch))
