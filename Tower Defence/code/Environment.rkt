@@ -68,7 +68,7 @@
     (define (remove-all-obstacles!)
       (map
        (lambda (obstacle)
-         (if (eq? (obstacle 'get-type) "portal")
+         (if (eq? (obstacle 'get-type) 'portal)
              (((draw 'get-power-up-layer) 'remove-drawable!) (obstacle 'get-portal-copy)))
          (((draw 'get-power-up-layer) 'remove-drawable!) (obstacle 'get-tile)))
        obstacles))
@@ -102,7 +102,7 @@
               (if (not (null? paths))
                   (begin
                     (if obstacle? ;If the monster is at in range of a obstacle
-                        (if (not (eq? (obstacle? 'get-type) "bomb"))
+                        (if (not (eq? (obstacle? 'get-type) 'bomb))
                             ((obstacle? 'get-behaviour) monster)))
                     (if ((monster-pos 'equal?) (car paths))
                         (begin
@@ -160,16 +160,21 @@
           (set! obstacles (list obstacle))
           (set! obstacles (append obstacles (list obstacle))))
       (((draw 'get-power-up-layer) 'add-drawable!) (obstacle 'get-tile))
-      (if (eq? (obstacle 'get-type) "portal")
+      (if (eq? (obstacle 'get-type) 'portal)
           (((draw 'get-power-up-layer) 'add-drawable!) (obstacle 'get-portal-copy))))
     
     (define (check-new-obstacles-tower) ;Check if a tower has a obstacle as projectile
       (map (lambda (tower)
              (let ((projectile (tower 'get-projectile)))
                (if projectile
-                   (if (projectile 'obstacle?)
-                       (if (not (memq projectile obstacles)) ;If the found obstacle is not part of the existing obstacle list
-                           (add-obstacle projectile))))))
+                   (if (list? projectile)
+                       (map (lambda (proj)
+                              (if (not (memq projectile obstacles))
+                                  (add-obstacle proj)))
+                            projectile)
+                       (if (projectile 'obstacle?)
+                           (if (not (memq projectile obstacles)) ;If the found obstacle is not part of the existing obstacle list
+                               (add-obstacle projectile)))))))
            towers))
     
     (define (towers-loop ms)
@@ -186,10 +191,10 @@
              (begin
                (remove-obstacle! obstacle)
                (((draw 'get-power-up-layer) 'remove-drawable!) (obstacle 'get-tile))
-               (if (eq? (obstacle 'get-type) "portal")
+               (if (eq? (obstacle 'get-type) 'portal)
                    (((draw 'get-power-up-layer) 'remove-drawable!) (obstacle 'get-portal-copy))))
              (if (<= (obstacle 'get-timer) 500)
-                 (if (eq? (obstacle 'get-type) "bomb")
+                 (if (eq? (obstacle 'get-type) 'bomb)
                      (bomb-explosion! obstacle ms))))
          ((obstacle 'minus-time!) ms))
        obstacles))
@@ -214,12 +219,16 @@
               ((tower 'set-cooldown!) 0)
               ((tower 'set-cooldown!) (- (tower 'cooldown) ms))))
       (if (tower 'get-projectile)
-          (if (<= ((tower 'get-projectile) 'get-timer) 0)
-              (begin
-                (if ((tower 'get-projectile) 'obstacle?)
-                    (set! obstacles (remove-el-from-list (tower 'get-projectile) obstacles)))
-                (((tower 'get-projectile) 'remove-projectile)))
-              (((tower 'get-projectile) 'minus-time!) ms))))
+          (if (not (list? (tower 'get-projectile)))
+              (check-projectile tower (tower 'get-projectile) ms))))
+
+    (define (check-projectile tower proj ms)
+      (if (<= (proj 'get-timer) 0)
+          (begin
+            (if (proj 'obstacle?)
+                (set! obstacles (remove-el-from-list (tower 'get-projectile) obstacles)))
+            ((proj 'remove-projectile)))
+          ((proj 'minus-time!) ms)))
 
     (define (monster-random-event)
       (map (lambda (monster)

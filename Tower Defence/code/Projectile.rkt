@@ -14,32 +14,39 @@
         (follow? #t))
 
     (case type
-      ("net" (begin
-               (set! tile (make-tile net-image-size net-image-size net-projectile-img net-projectile-mask))
-               (set! damage 0)
-               (set! target-pos (create-target-pos target))
-               (set! obstacle? #t)
-               (set! behaviour (lambda (monster)
-                                 ((monster 'set-speed!) (/ (monster 'get-default-speed) 2))
-                                 ((monster 'set-infection!) infection-duration)))))
-      ("bomb" (begin
-                (set! tile (make-tile net-image-size net-image-size bomb-img bomb-mask))
-                (if (not (eq? target 'Dummy-target))
-                    (begin
-                      (set! target-pos (create-target-pos target))
-                      (set! obstacle? #t)
-                      (set! damage 0)
-                      (set! timer 5000)
-                      (set! behaviour (lambda (monsters dmg ms draw)
-                                        (((draw 'get-power-up-layer) 'remove-drawable!) tile)
-                                        (set-tile! (make-tile explosion-size explosion-size explosion-img explosion-mask))
-                                        ((draw 'reposition!) tile position 2)
-                                        (((draw 'get-power-up-layer) 'add-drawable!) tile)
-                                        (map (lambda (monster)
-                                               (if ((position 'in-area?) (monster 'get-position) explosion-range)
-                                                   ((monster 'hit!) dmg)))
-                                             monsters)
-                                        (minus-timer ms)))))))) ;Random 1 or 2
+      ('net (begin
+              (set! tile (make-tile net-image-size net-image-size net-projectile-img net-projectile-mask))
+              (set! damage 0)
+              (set! target-pos (create-target-pos target))
+              (set! obstacle? #t)
+              (set! behaviour (lambda (monster)
+                                ((monster 'set-speed!) (/ (monster 'get-default-speed) 2))
+                                ((monster 'set-infection!) infection-duration)))))
+      ('bomb (begin
+               (set! tile (make-tile net-image-size net-image-size bomb-img bomb-mask))
+               (if (not (eq? target 'Dummy-target))
+                   (begin
+                     (set! target-pos (create-target-pos target))
+                     (set! obstacle? #t)
+                     (set! damage 0)
+                     (set! timer 5000)
+                     (set! behaviour (lambda (monsters dmg ms draw)
+                                       (((draw 'get-power-up-layer) 'remove-drawable!) tile)
+                                       (set-tile! (make-tile explosion-size explosion-size explosion-img explosion-mask))
+                                       ((draw 'reposition!) tile position 2)
+                                       (((draw 'get-power-up-layer) 'add-drawable!) tile)
+                                       (map (lambda (monster)
+                                              (if ((position 'in-area?) (monster 'get-position) explosion-range)
+                                                  ((monster 'hit!) dmg)))
+                                            monsters)
+                                       (minus-timer ms)))))))
+      ('shooter (begin
+                  (set! tile (make-tile projectile-image-size projectile-image-size shooter-projectile-img shooter-projectile-mask))
+                  (set! follow? #f)
+                  (set! obstacle? #t)
+                  (set! timer 1000)
+                  (set! behaviour (lambda (monster)
+                                    ((monster 'hit!) damage))))))
 
     (define (set-scale) ;This sets the scale of projectile
       ((tile 'set-scale!) size-factor)
@@ -60,13 +67,13 @@
           (begin
             (if follow?
                 (calculate-move!))
-            (if (not (null? (target 'get-position)))
+            (if (and (not (eq? type 'shooter)) (not (null? (target 'get-position))))
                 (if ((position 'close-enough?) (target 'get-position))
                     (begin
                       (if obstacle? ;Is the projectile a obstacle?
                           (set-move! #f))
                       ((target 'hit!) damage)
-                      (if (or (eq? type "bomb") (eq? type "net"))
+                      (if (or (eq? type 'bomb) (eq? type 'net))
                           (((tower 'get-environment) 'add-obstacle) (tower 'get-projectile)))
                       (remove-projectile))))
             (if ((position 'outside-playarea?) width height)
@@ -88,6 +95,9 @@
     (define (set-tile! new)
       (set! tile new))
 
+    (define (set-angle! val)
+      (set! angle val))
+
     
     (define (dispatch mes)
       (cond ((eq? mes 'get-tile) tile)
@@ -103,6 +113,7 @@
             ((eq? mes 'get-type) type)
             ((eq? mes 'set-tile!) set-tile!)
             ((eq? mes 'entity?) 'power-up)
+            ((eq? mes 'set-angle!) set-angle!)
             (else (display "Error: Wrong dispatch message (Projectile.rkt) -> ") (display mes))))
     (set-scale)
     (if (and (not (null? target)) (not (eq? target 'Dummy-target)))

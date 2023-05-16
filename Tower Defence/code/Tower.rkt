@@ -18,17 +18,19 @@
     (case type
       (4 (begin ;Net Tower
            (set! tile (make-tile image-size image-size net-tower-img net-tower-mask))
-           (set! projectile-type "net")
+           (set! projectile-type 'net)
            (set! cooldown-time 3000)
            (set! cost 100)))
 
       (5 (begin ;8 Shooter tower
            (set! tile (make-tile image-size image-size bullet-tower-img bullet-tower-mask))
+           (set! projectile-type 'shooter)
+           (set! cooldown-time 1000)
            (set! cost 200)))
 
       (6 (begin ;Bomb Tower
            (set! tile (make-tile image-size image-size bom-tower-img bom-tower-mask))
-           (set! projectile-type "bomb")
+           (set! projectile-type 'bomb)
            (set! cooldown-time 5000)
            (set! cost 200))))
    
@@ -55,18 +57,28 @@
           (set! target #f)))
     
     (define (shoot!)
-      (if target ;If the tower has a target
+      (if (or target (= type 5)) ;If the tower has a target
           (begin
             (if (= cooldown 0)
                 (if projectile
-                    ((projectile 'move!)) ;If projectile exists, move it
-                    (begin
-                      (let ((new-projectile (make-projectile projectile-type (make-position (position 'get-x) (position 'get-y)) target dispatch)))
-                        (set-projectile! new-projectile)
-                        ((((environment 'draw) 'projectile-layer) 'add-drawable!) (projectile 'get-tile))
-                        (set! cooldown cooldown-time))))
+                    (if (list? projectile)
+                        (map (lambda (proj)
+                               ((proj 'move!)))
+                             projectile)
+                        ((projectile 'move!)))
+                    (if (= type 5)
+                        (add-all-projectiles)
+                        (begin
+                          (let ((new-projectile (make-projectile projectile-type (make-position (position 'get-x) (position 'get-y)) target dispatch)))
+                            (set-projectile! new-projectile)
+                            ((((environment 'draw) 'projectile-layer) 'add-drawable!) (projectile 'get-tile))
+                            (set! cooldown cooldown-time)))))
                 (if projectile
-                    ((projectile 'move!)))))
+                    (if (list? projectile)
+                        (map (lambda (proj)
+                               ((proj 'move)))
+                             projectile)
+                        ((projectile 'move!))))))
           (if projectile
               ((projectile 'remove-projectile)))))
     
@@ -75,6 +87,20 @@
 
     (define (set-projectile! value)
       (set! projectile value))
+
+    (define (add-all-projectiles)
+      (set! projectile '())
+      (define (iter lst)
+        (if (not (null? lst))
+            (begin
+              (let ((proj (make-projectile 'shooter (make-position (position 'get-x) (position 'get-y)) '() dispatch)))
+                ((proj 'set-angle!) (car lst))
+                (set! projectile (add-element-to-list proj projectile)))
+              (iter (cdr lst)))))
+      (iter angles)
+      (map (lambda (proj)
+             ((environment 'add-obstacle) proj))
+           projectile))
   
     (define (dispatch mes)
       (cond ((eq? mes 'get-tile) tile)

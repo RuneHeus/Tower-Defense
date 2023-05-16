@@ -41,6 +41,8 @@
 (define standard-projectile-mask "../images/Projectiles/projectile_mask.png")
 (define net-projectile-img "../images/Projectiles/net.png")
 (define net-projectile-mask "../images/Projectiles/net_mask.png")
+(define shooter-projectile-img "../images/Projectiles/shooter.png")
+(define shooter-projectile-mask "../images/Projectiles/shooter_mask.png")
 ;------------------------------------------------------------------------
 
 ;--------------------------Tower-----------------------------------------
@@ -102,7 +104,7 @@
 
 ;--------------portal-------------------------------------------------------------------
 (define portal-pos (make-position 650 300))
-(define portal (make-power-up "portal" "Dummy path" "Dummy environment" "Dummy")) ;This is a dummy portal
+(define portal (make-power-up 'portal "Dummy path" "Dummy environment" "Dummy")) ;This is a dummy portal
 ;----------------------------------------------------------------------------------------
 
 ;--------------bomb-------------------------------------------------------------------
@@ -119,3 +121,7 @@
                              (cons portal portal-pos)
                              (cons bomb bomb-pos)))
 ;-------------------------------------------------------------------------------------------------------
+
+;--------------tower5-angles-----------------------------------------------------------------------------------------------------------------------------------
+(define angles (list -1.5707963267948966 -0.7853981633974483 0 0.7853981633974483 1.5707963267948966 3.9269908169872414 3.141592653589793 -3.9269908169872414))
+;--------------------------------------------------------------------------------------------------------------------------------------------------------------

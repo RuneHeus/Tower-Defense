@@ -8,7 +8,7 @@
         (behaviour '()))
     
     (case type
-      ("portal" (begin
+      ('portal (begin
                   (set! tile (make-tile image-size image-size portal-img portal-mask))
                   (set! position portal-pos)
                   (if (null? dummy?)

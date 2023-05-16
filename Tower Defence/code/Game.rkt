@@ -64,7 +64,7 @@
                                 (begin
                                   (set! menu-clicked #t)
                                   (if (eq? ((car item) 'entity?) 'power-up)
-                                      (if (eq? ((car item) 'get-type) "bomb")
+                                      (if (eq? ((car item) 'get-type) 'bomb)
                                           (if (null? (player 'get-bomb-timer))
                                               (begin
                                                 ((player 'set-bomb-time!) 10000)
@@ -99,9 +99,9 @@
                    (begin ((draw 'draw-game-status-text)) (clean!)))
                (if (and (eq? type 'pressed) (eq? key #\w))
                    (if (wave 'wave-ready?)
-                       ((wave 'load-wave!)))))
-             (if (and (eq? type 'pressed) (eq? key #\o))
-                 (begin (display "Test") ((player 'set-points!) 99999999) ((draw 'draw-game-status-text))))))))
+                       ((wave 'load-wave!))))
+               (if (and (eq? type 'pressed) (eq? key #\m))
+                   (begin (display "Test") ((player 'set-points!) 99999999) ((draw 'draw-game-status-text)))))))))
   
     (define (load-world!)
       (draw 'draw-world!)) ;Call draw-world! from Draw ADT
