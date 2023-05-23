@@ -82,32 +82,36 @@
         (set! game-over-tiles (add-element-to-list restart-tile game-over-tiles))))
     
     (define (draw-world!)
-      (let ((tile (make-tile width height)))
-        ((tile 'draw-rectangle!) 0 0 width height "green")
-        ((tile 'draw-rectangle!) (start-position 'get-x) (start-position 'get-y) (* 300 size-factor) (* 50 size-factor) "brown") ;Pad ((0,5) -> (15,5)) (division)
-        ((tile 'draw-rectangle!) (* 300 size-factor) (* 100 size-factor) (* size-factor 50) (* 400 size-factor) "brown") ;Pad ((15,5) -> (15,35)) (division)
-        ((tile 'draw-rectangle!) (* size-factor 300) (* size-factor 500) (* 500 size-factor)  (* 50 size-factor) "brown") ;Pad ((15,35) -> (40,35)) (division)
+      (let ((tile (make-tile width height "../images/World/World.png")))
+        ;        ((tile 'draw-rectangle!) 0 0 width height "green")
+        ;        ((tile 'draw-rectangle!) (start-position 'get-x) (start-position 'get-y) (* 300 size-factor) (* 50 size-factor) "brown") ;Pad ((0,5) -> (15,5)) (division)
+        ;        ((tile 'draw-rectangle!) (* 300 size-factor) (* 100 size-factor) (* size-factor 50) (* 400 size-factor) "brown") ;Pad ((15,5) -> (15,35)) (division)
+        ;        ((tile 'draw-rectangle!) (* size-factor 300) (* size-factor 500) (* 500 size-factor)  (* 50 size-factor) "brown") ;Pad ((15,35) -> (40,35)) (division)
+
+        
         ((background-layer 'add-drawable!) tile)
-        ((text-layer 'add-drawable!) restart-text)
-        ;        (define (draw-stripes-horizontal!)
-        ;          (let loop ((pos-tile (make-tile width height))
-        ;                     (y 0))
-        ;            (cond ((> y height) ((pos-layer 'add-drawable!) pos-tile))
-        ;                  (else
-        ;                   (begin
-        ;                     ((pos-tile 'draw-line!) 0 y width y 1 "black")
-        ;                     (loop pos-tile (+ y (* 50 size-factor))))))))
-        ;              
-        ;        (define (draw-stripes-vertical!)
-        ;          (let loop ((pos-tile (make-tile width height))
-        ;                     (x 0))
-        ;            (cond ((> x width) ((pos-layer 'add-drawable!) pos-tile))
-        ;                  (else
-        ;                   (begin
-        ;                     ((pos-tile 'draw-line!) x 0 x height 1 "black")
-        ;                     (loop pos-tile (+ x (* 50 size-factor))))))))         
-        ;        (draw-stripes-horizontal!)
-        ;        (draw-stripes-vertical!)
+;
+;        
+;        ((text-layer 'add-drawable!) restart-text)
+;        (define (draw-stripes-horizontal!)
+;          (let loop ((pos-tile (make-tile width height))
+;                     (y 0))
+;            (cond ((> y height) ((pos-layer 'add-drawable!) pos-tile))
+;                  (else
+;                   (begin
+;                     ((pos-tile 'draw-line!) 0 y width y 1 "black")
+;                     (loop pos-tile (+ y (* 50 size-factor))))))))
+;                      
+;        (define (draw-stripes-vertical!)
+;          (let loop ((pos-tile (make-tile width height))
+;                     (x 0))
+;            (cond ((> x width) ((pos-layer 'add-drawable!) pos-tile))
+;                  (else
+;                   (begin
+;                     ((pos-tile 'draw-line!) x 0 x height 1 "black")
+;                     (loop pos-tile (+ x (* 50 size-factor))))))))         
+;        (draw-stripes-horizontal!)
+;        (draw-stripes-vertical!)
         (draw-menu!)))
 
     (define (draw-menu!)

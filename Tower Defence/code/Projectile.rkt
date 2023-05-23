@@ -29,7 +29,7 @@
                      (set! target-pos (create-target-pos target))
                      (set! obstacle? #t)
                      (set! damage 0)
-                     (set! timer 5000)
+                     (set! timer 2000)
                      (set! behaviour (lambda (monsters dmg ms draw)
                                        (((draw 'get-power-up-layer) 'remove-drawable!) tile)
                                        (set-tile! (make-tile explosion-size explosion-size explosion-img explosion-mask))
@@ -43,10 +43,7 @@
       ('shooter (begin
                   (set! tile (make-tile projectile-image-size projectile-image-size shooter-projectile-img shooter-projectile-mask))
                   (set! follow? #f)
-                  (set! obstacle? #t)
-                  (set! timer 1000)
-                  (set! behaviour (lambda (monster)
-                                    ((monster 'hit!) damage))))))
+                  (set! timer 1000))))
 
     (define (set-scale) ;This sets the scale of projectile
       ((tile 'set-scale!) size-factor)
@@ -75,7 +72,13 @@
                       ((target 'hit!) damage)
                       (if (or (eq? type 'bomb) (eq? type 'net))
                           (((tower 'get-environment) 'add-obstacle) (tower 'get-projectile)))
-                      (remove-projectile))))
+                      (remove-projectile)))
+                (map (lambda (monster)
+                       (if ((position 'close-enough?) (monster 'get-position))
+                           (begin
+                             ((monster 'hit!) damage)
+                             (remove-projectile))))
+                     (environment 'get-monsters)))
             (if ((position 'outside-playarea?) width height)
                 (remove-projectile)
                 (begin
@@ -84,7 +87,9 @@
     
     (define (remove-projectile) ;If projectile = obstacle, delete it from the environment list
       ((((environment 'draw) 'projectile-layer) 'remove-drawable!) tile)
-      ((tower 'set-projectile!) #f))
+      (if (not (eq? type 'shooter))
+          ((tower 'set-projectile!) #f)
+          ((tower 'remove-projectile-from-list) dispatch)))
 
     (define (minus-timer value)
       (set! timer (- timer value)))
@@ -98,6 +103,8 @@
     (define (set-angle! val)
       (set! angle val))
 
+    (define (set-environment! env)
+      (set! environment env))
     
     (define (dispatch mes)
       (cond ((eq? mes 'get-tile) tile)

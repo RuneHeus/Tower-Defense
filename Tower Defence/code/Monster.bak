@@ -11,7 +11,10 @@
          (on-hit '())
          (random-event '())
          (on-death '())
-         (infection 0))
+         (infection #f) ;Eather false or a cooldown number
+         (points 10)
+         (passsed-obstacles '())
+         (area '()))
     
     (case type ;If red is chosen then no option is selected, then we use the default values
       ("Blue" (begin
@@ -19,6 +22,7 @@
                 (set! speed health)
                 (set! default-speed 3)
                 (set! damage 2)
+                (set! points 30)
                 (set! tile (make-tile image-size image-size blue-monster-img blue-monster-mask))
                 (set! on-hit (lambda () (if (eq? health 1)
                                             (set! speed 1))))))
@@ -26,6 +30,7 @@
       ("Gray" (begin
                 (set! health 3)
                 (set! damage 2)
+                (set! points 30)
                 (set! tile (make-tile image-size image-size gray-monster-img gray-monster-mask))
                 (set! random-event (lambda ()
                                      (cond ((eq? speed 1) (set! speed (+ speed (random 0 3))))
@@ -33,8 +38,9 @@
                                            (else (set! speed (+ speed (random -1 2)))))))))
       
       ("Purple" (begin
-                  (set! health 1)
+                  (set! health 4)
                   (set! damage 3)
+                  (set! points 40)
                   (set! tile (make-tile image-size image-size purple-monster-img purple-monster-mask))
                   (set! on-death (lambda (monsters next-pos)
                                    (map (lambda (monster)
@@ -81,6 +87,11 @@
 
     (define (set-infection! value)
       (set! infection value))
+
+    (define (add-passed-obstacle! obstacle)
+      (if (null? passsed-obstacles)
+          (set! passed-obstacles (list obstacle))
+          (set! passed-obstacles (append passed-obstacles (list obstacle)))))
     
     (define (dispatch mes)
       (cond ((eq? mes 'get-position) position)
@@ -105,8 +116,11 @@
             ((eq? mes 'get-type) type)
             ((eq? mes 'get-damage) damage)
             ((eq? mes 'set-speed!) set-speed!)
-            ((eq? mes 'set-infection) set-infection!)
+            ((eq? mes 'set-infection!) set-infection!)
             ((eq? mes 'get-infection) infection)
-            ((eq? mes 'get-default-speed) default-speed)))
+            ((eq? mes 'get-default-speed) default-speed)
+            ((eq? mes 'get-points) points)
+            ((eq? mes 'add-passed-obstacle!) add-passed-obstacle!)
+            ((eq? mes 'get-passed-obstacles) passsed-obstacles)))
     (set-scale!)
     dispatch))

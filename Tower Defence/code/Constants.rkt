@@ -12,8 +12,12 @@
 
 
 ;--------------------------Path-position---------------------------------
-(define start-position (make-position 0 (* 100 size-factor)))
-(define end-position (make-position (* 750 size-factor) (* size-factor 500)))
+(define start-position (make-position 0 (* 300 size-factor)))
+(define path-1 (make-position (* size-factor 300) (* size-factor 300)))
+(define path-2 (make-position (* size-factor 300) (* size-factor 100)))
+(define path-3 (make-position (* size-factor 500) (* size-factor 100)))
+(define path-4 (make-position (* size-factor 500) (* size-factor 450)))
+(define end-position (make-position (* 750 size-factor) (* size-factor 450)))
 ;------------------------------------------------------------------------
 
 ;--------------------------Image-----------------------------------------
@@ -109,7 +113,7 @@
 
 ;--------------bomb-------------------------------------------------------------------
 (define bomb-pos (make-position 700 300))
-(define bomb (make-projectile "bomb" bomb-pos 'Dummy-target 'Dummy-tower)) ;This is a dummy bomb
+(define bomb (make-projectile 'bomb bomb-pos 'Dummy-target 'Dummy-tower)) ;This is a dummy bomb
 ;---------------------------------------------------------------------------------------
 
 (define menu-list (list tower1 tower4 tower5 tower6 portal bomb))

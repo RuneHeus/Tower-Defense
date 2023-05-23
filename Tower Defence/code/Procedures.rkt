@@ -9,7 +9,7 @@
         exist?
         (map (lambda (obstacle)
                (if (((object 'get-position) 'close-enough?) (obstacle 'get-position))
-                   (set! exist? obstacle))) obstacles))
+                   (begin (display "Close") (set! exist? obstacle)))) obstacles))
     exist?))
 
 (define (print-el-in-list list)

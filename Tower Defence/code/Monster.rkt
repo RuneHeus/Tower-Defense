@@ -12,7 +12,7 @@
          (random-event '())
          (on-death '())
          (infection #f) ;Eather false or a cooldown number
-         (points 10)
+         (points 30)
          (passsed-obstacles '())
          (area '()))
     
@@ -22,7 +22,7 @@
                 (set! speed health)
                 (set! default-speed 3)
                 (set! damage 2)
-                (set! points 30)
+                (set! points 50)
                 (set! tile (make-tile image-size image-size blue-monster-img blue-monster-mask))
                 (set! on-hit (lambda () (if (eq? health 1)
                                             (set! speed 1))))))
@@ -30,7 +30,7 @@
       ("Gray" (begin
                 (set! health 3)
                 (set! damage 2)
-                (set! points 30)
+                (set! points 60)
                 (set! tile (make-tile image-size image-size gray-monster-img gray-monster-mask))
                 (set! random-event (lambda ()
                                      (cond ((eq? speed 1) (set! speed (+ speed (random 0 3))))
@@ -40,7 +40,7 @@
       ("Purple" (begin
                   (set! health 4)
                   (set! damage 3)
-                  (set! points 40)
+                  (set! points 60)
                   (set! tile (make-tile image-size image-size purple-monster-img purple-monster-mask))
                   (set! on-death (lambda (monsters next-pos)
                                    (map (lambda (monster)
@@ -123,4 +123,5 @@
             ((eq? mes 'add-passed-obstacle!) add-passed-obstacle!)
             ((eq? mes 'get-passed-obstacles) passsed-obstacles)))
     (set-scale!)
+    ((position 'set-distance-num!) 5)
     dispatch))

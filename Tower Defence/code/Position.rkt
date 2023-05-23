@@ -1,7 +1,8 @@
 (define (make-position xCoordinate yCoordinate)
 
   (let ((x xCoordinate)
-        (y yCoordinate))
+        (y yCoordinate)
+        (distance-num 30))
     
     (define (set-x! num)
       (set! x num))
@@ -23,10 +24,13 @@
 
     (define (close-enough? target-pos)
       (let ((distance (sqrt (+ (expt (- (target-pos 'get-x) x) 2) (expt (- (target-pos 'get-y) y) 2)))))
-        (< distance 30)))
+        (< distance distance-num)))
 
     (define (outside-playarea? area-pos-x area-pos-y)
       (or (> x area-pos-x) (> y area-pos-y) (< x 0) (< y 0)))
+
+    (define (set-distance-num! num)
+      (set! distance-num num))
 
     (define (display-position)
       (newline)
@@ -50,5 +54,7 @@
             ((eq? mes 'close-enough?) close-enough?)
             ((eq? mes 'outside-playarea?) outside-playarea?)
             ((eq? mes 'display-position) display-position)
+            ((eq? mes 'set-distance-num!) set-distance-num!)
+            ((eq? mes 'get-distance-num) distance-num)
             (else (display "Error: Wrong dispatch message (Position.rkt) -> ") (display mes))))
     dispatch))

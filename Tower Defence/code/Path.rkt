@@ -3,10 +3,12 @@
 (define (make-path start-position end-position)
 
   (let* ((start start-position)
-         (path1 (make-position (* size-factor 300) (* size-factor 100)))
-         (path2 (make-position (* size-factor 300) (* size-factor 500)))
+         (path1 path-1)
+         (path2 path-2)
+         (path3 path-3)
+         (path4 path-4)
          (end end-position))
-    (define path-positions (list start path1 path2 end))
+    (define path-positions (list start path1 path2 path3 path4 end))
   
     (define (endpoint? monster)
       (((monster 'position) 'equal?) end-position))
@@ -50,6 +52,7 @@
             ((eq? mes 'next-pos-to-far?) next-pos-to-far?)
             ((eq? mes 'on-path?) on-path?)
             ((eq? mes 'get-path1) path1)
+            ((eq? mes 'get-path2) path2)
             ((eq? mes 'random-pos-on-path) random-pos-on-path)
             (else (display "Error: Wrong dispatch message (Path.rkt)"))))
     dispatch))

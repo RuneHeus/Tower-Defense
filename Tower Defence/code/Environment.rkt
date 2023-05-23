@@ -62,7 +62,9 @@
       (map
        (lambda (tower)
          (if (tower 'get-projectile)
-             (((draw 'projectile-layer) 'remove-drawable!) ((tower 'get-projectile) 'get-tile))))
+             (if (eq? (tower 'get-type) 5)
+                 ((tower 'remove-all-projectiles))
+                 (((draw 'projectile-layer) 'remove-drawable!) ((tower 'get-projectile) 'get-tile)))))
        towers))
 
     (define (remove-all-obstacles!)
@@ -71,22 +73,20 @@
          (if (eq? (obstacle 'get-type) 'portal)
              (((draw 'get-power-up-layer) 'remove-drawable!) (obstacle 'get-portal-copy)))
          (((draw 'get-power-up-layer) 'remove-drawable!) (obstacle 'get-tile)))
-       obstacles))
+       obstacles)
+      (set-obstacles! '()))
 
     (define (remove-obstacle! obstacle)
       (set! obstacles (remove-el-from-list obstacle obstacles)))
 
     (define (remove-all-objects!)
       (remove-all-monsters!)
-      (remove-all-towers!)
       (remove-all-projectiles!)
-      (remove-all-obstacles!))
+      (remove-all-obstacles!)
+      (remove-all-towers!))
 
     (define (reset!)
-      (remove-all-objects!)
-      (set-monsters! '())
-      (set-towers! '())
-      (set-obstacles! '()))
+      (remove-all-objects!))
 
       
     (define (set-new-increment! monster)
@@ -103,16 +103,17 @@
                   (begin
                     (if obstacle? ;If the monster is at in range of a obstacle
                         (if (not (eq? (obstacle? 'get-type) 'bomb))
-                            ((obstacle? 'get-behaviour) monster)))
+                            (begin ((obstacle? 'get-behaviour) monster))))
                     (if ((monster-pos 'equal?) (car paths))
                         (begin
                           ((monster 'set-angle!) (atan (- ((cadr paths) 'get-y) (monster-pos 'get-y)) (- ((cadr paths) 'get-x) (monster-pos 'get-x))))
                           ((monster 'set-last-path-position!) (car paths)))
-                        (if ((path 'next-pos-to-far?) monster next-pos) ;Is the monster going to overshoot the next path position?
+                        (if ((monster-pos 'close-enough?) next-pos) ;Is the monster going to overshoot the next path position?
                             (begin
                               ((monster-pos 'change-coordinates!) (next-pos 'get-x) (next-pos 'get-y))
                               ((draw 'reposition!) (monster 'get-tile) (monster 'get-position))
-                              (set! move-monster? #f))))
+                              (set! move-monster? #f)))
+                        )
                     (loop (cdr paths))))))
         (loop (path 'path-positions))
         move-monster?))

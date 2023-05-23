@@ -31,7 +31,7 @@
       (6 (begin ;Bomb Tower
            (set! tile (make-tile image-size image-size bom-tower-img bom-tower-mask))
            (set! projectile-type 'bomb)
-           (set! cooldown-time 5000)
+           (set! cooldown-time 2000)
            (set! cost 200))))
    
     (define (set-scale!) ;This sets the scale of the tower
@@ -67,7 +67,9 @@
                              projectile)
                         ((projectile 'move!)))
                     (if (= type 5)
-                        (add-all-projectiles)
+                        (begin
+                          (remove-all-projectiles)
+                          (add-all-projectiles))
                         (begin
                           (let ((new-projectile (make-projectile projectile-type (make-position (position 'get-x) (position 'get-y)) target dispatch)))
                             (set-projectile! new-projectile)
@@ -76,7 +78,7 @@
                 (if projectile
                     (if (list? projectile)
                         (map (lambda (proj)
-                               ((proj 'move)))
+                               ((proj 'move!)))
                              projectile)
                         ((projectile 'move!))))))
           (if projectile
@@ -87,6 +89,14 @@
 
     (define (set-projectile! value)
       (set! projectile value))
+
+    (define (remove-all-projectiles)
+      (if (not (eq? projectile #f))
+          (begin
+            (map (lambda (proj)
+                   ((proj 'remove-projectile)))
+                 projectile)
+            (set! projectile #f))))
 
     (define (add-all-projectiles)
       (set! projectile '())
@@ -99,8 +109,14 @@
               (iter (cdr lst)))))
       (iter angles)
       (map (lambda (proj)
-             ((environment 'add-obstacle) proj))
-           projectile))
+             ((((environment 'draw) 'projectile-layer) 'add-drawable!) (proj 'get-tile)))
+           projectile)
+      (set! cooldown cooldown-time))
+
+    (define (remove-projectile-from-list proj)
+      (set! projectile (remove-el-from-list proj projectile))
+      (if (null? projectile)
+          (set! projectile #f)))
   
     (define (dispatch mes)
       (cond ((eq? mes 'get-tile) tile)
@@ -117,6 +133,8 @@
             ((eq? mes 'check-area?) check-area?)
             ((eq? mes 'get-cost) cost)
             ((eq? mes 'get-type) type)
-            ((eq? mes 'get-environment) environment)))
+            ((eq? mes 'get-environment) environment)
+            ((eq? mes 'remove-all-projectiles) remove-all-projectiles)
+            ((eq? mes 'remove-projectile-from-list) remove-projectile-from-list)))
     (set-scale!)
     dispatch))
