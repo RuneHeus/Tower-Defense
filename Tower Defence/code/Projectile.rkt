@@ -9,6 +9,7 @@
         (damage 1)
         (timer 3000)
         (move? #t)
+        (speed 8)
         (behaviour '())
         (obstacle? #f)
         (follow? #t))
@@ -65,8 +66,9 @@
             (if follow?
                 (calculate-move!))
             (if (and (not (eq? type 'shooter)) (not (null? (target 'get-position))))
-                (if ((position 'close-enough?) (target 'get-position))
+                (if ((position 'close-enough?) (target 'get-position) #t)
                     (begin
+                      ;((position 'display-compare-position) (target 'get-position))
                       (if obstacle? ;Is the projectile a obstacle?
                           (set-move! #f))
                       ((target 'hit!) damage)
@@ -82,8 +84,11 @@
             (if ((position 'outside-playarea?) width height)
                 (remove-projectile)
                 (begin
-                  ((position 'change-coordinates!) (+ (position 'get-x) (* 10 (cos angle))) (+ (position 'get-y) (* 10 (sin angle))))
-                  (((environment 'draw) 'reposition!) tile position))))))
+                  ((position 'change-coordinates!) (+ (position 'get-x) (* speed (cos angle))) (+ (position 'get-y) (* speed (sin angle))))
+                  (((environment 'draw) 'reposition!) tile position)
+                  (if (not (null? target))
+                      (if ((position 'overshooting?) (target 'get-position) angle speed)
+                          ((position 'change-coordinates!) ((target 'get-position) 'get-x) ((target 'get-position) 'get-y)))))))))
     
     (define (remove-projectile) ;If projectile = obstacle, delete it from the environment list
       ((((environment 'draw) 'projectile-layer) 'remove-drawable!) tile)
@@ -125,6 +130,7 @@
     (set-scale)
     (if (and (not (null? target)) (not (eq? target 'Dummy-target)))
         (begin
-          (calculate-move!)
+          (if (not follow?)
+              (calculate-move!))
           (move!)))
     dispatch))

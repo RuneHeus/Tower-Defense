@@ -8,8 +8,9 @@
     (if (null? obstacles)
         exist?
         (map (lambda (obstacle)
+               ;(((object 'get-position) 'display-compare-position) (obstacle 'get-position))
                (if (((object 'get-position) 'close-enough?) (obstacle 'get-position))
-                   (begin (display "Close") (set! exist? obstacle)))) obstacles))
+                   (set! exist? obstacle))) obstacles))
     exist?))
 
 (define (print-el-in-list list)

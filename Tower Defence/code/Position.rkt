@@ -2,7 +2,7 @@
 
   (let ((x xCoordinate)
         (y yCoordinate)
-        (distance-num 30))
+        (distance-num 15))
     
     (define (set-x! num)
       (set! x num))
@@ -22,8 +22,8 @@
       (set! x num1)
       (set! y num2))
 
-    (define (close-enough? target-pos)
-      (let ((distance (sqrt (+ (expt (- (target-pos 'get-x) x) 2) (expt (- (target-pos 'get-y) y) 2)))))
+    (define (close-enough? target-pos . mes)
+      (let ((distance (+ (expt (- (target-pos 'get-x) x) 2) (expt (- (target-pos 'get-y) y) 2))))
         (< distance distance-num)))
 
     (define (outside-playarea? area-pos-x area-pos-y)
@@ -31,6 +31,23 @@
 
     (define (set-distance-num! num)
       (set! distance-num num))
+
+    (define (calculate-distance position)
+      (sqrt (+ (expt (- (position 'get-x) x) 2) (expt (- (position 'get-y) y) 2))))
+
+    (define (overshooting? position angle speed)
+      (let ((next-pos (make-position x y))
+            (prev-distance '())
+            (next-distance '()))
+        ((next-pos 'set-x!) (+ (next-pos 'get-x) (* speed (cos angle))))
+        ((next-pos 'set-y!) (+ (next-pos 'get-y) (* speed (sin angle))))
+        (set! prev-distance (calculate-distance position))
+        (set! next-distance ((next-pos 'calculate-distance) position))
+        (display prev-distance)
+        (display " <= ")
+        (display next-distance)
+        (newline)
+        (<= prev-distance next-distance)))
 
     (define (display-position)
       (newline)
@@ -42,6 +59,22 @@
       (display y)
       (newline)
       (display "-------------------"))
+
+    (define (display-compare-position position)
+      (display "------------Compare----------")
+      (newline)
+      (display "X: ")
+      (display x)
+      (display " <-> ")
+      (display (position 'get-x))
+      (newline)
+      (display "Y: ")
+      (display y)
+      (display " <-> ")
+      (display (position 'get-y))
+      (newline)
+      (display "-----------------------------")
+      (newline))
 
     (define (dispatch mes)
       (cond ((eq? mes 'get-x) x)
@@ -56,5 +89,8 @@
             ((eq? mes 'display-position) display-position)
             ((eq? mes 'set-distance-num!) set-distance-num!)
             ((eq? mes 'get-distance-num) distance-num)
+            ((eq? mes 'display-compare-position) display-compare-position)
+            ((eq? mes 'overshooting?) overshooting?)
+            ((eq? mes 'calculate-distance) calculate-distance)
             (else (display "Error: Wrong dispatch message (Position.rkt) -> ") (display mes))))
     dispatch))
