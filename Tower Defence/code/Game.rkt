@@ -14,7 +14,10 @@
       (((draw 'get-window) 'set-key-callback!)
        (lambda (type key)
          (if (and (eq? type 'pressed) (eq? key #\s))
-             (clean!)))))
+             (begin
+               (load-world!)
+               (clean!)
+               (game-loop))))))
 
     (define (reset!)
       (set! monster-spawn-time 0)
@@ -25,9 +28,8 @@
       ((player 'reset!))
       ((environment 'reset!))
       ((draw 'reset!))
-      ((wave 'start-wave!))
-      (load-world!)
-      (game-loop))
+      ((wave 'reset!))
+      )
 
     (define (stop!)
       ((draw 'draw-game-over-screen!))
@@ -43,8 +45,6 @@
        (lambda (ms)
          (if game-loop-status
              (begin
-               (if (and (null? (wave 'get-wave-list)) (null? (environment 'get-monsters)))
-                   ((wave 'set-wave-ready!) #t)) 
                (if (<= (player 'get-health) 0)
                    (begin
                      (stop!)
@@ -82,10 +82,10 @@
          (if game-loop
              (begin 
                (if (and (eq? type 'pressed) (eq? key #\space))
-                   (begin ((draw 'draw-game-status-text)) (clean!)))
+                   (begin ((draw 'draw-game-status-text)) (clean!) ((draw 'remove-wave-count!))))
                (if (and (eq? type 'pressed) (eq? key #\w))
                    (if (wave 'wave-ready?)
-                       ((wave 'load-wave!))))
+                       (begin ((wave 'load-wave!)) ((draw 'remove-wave-text!)))))
                (if (and (eq? type 'pressed) (eq? key #\m)) ((player 'set-points!) 99999999) ((draw 'draw-game-status-text))))))))
   
     (define (load-world!)
@@ -99,7 +99,8 @@
       (if (>= monster-move-time 10) ;Only move monster each 10 ms, so that it runs sort of even on every computer
           (begin (set! monster-move-time 0)
                  ((environment 'monsters-loop) ms)
-                 ((environment 'towers-loop) ms)
+                 (if (not (wave 'wave-ready?))
+                     ((environment 'towers-loop) ms))
                  ((environment 'obstacle-process) ms)
                  (player-process ms))))
 
@@ -126,16 +127,20 @@
                     (begin
                       ((player 'set-bomb-time!) 10000)
                       ((draw 'add-bomb-opacity!))
-                      (let ((rand-amount (random 1 5)))
+                      (let ((rand-amount (random 1 5))
+                            (projectile '()))
                         (do ((i 0 (+ i 1)))
                           ((= i rand-amount))
-                          ((environment 'add-obstacle) (make-projectile ((car item) 'get-type) ((path'random-pos-on-path)) '() '()))))))
+                          (begin
+                            (set! projectile (make-projectile ((car item) 'get-type) ((path'random-pos-on-path)) '() '()))
+                            ((projectile 'set-projectile?) #f)
+                            ((environment 'add-obstacle) projectile))))))
                 (if (null? (player 'get-portal-timer))
                     (begin 
                       ((player 'set-portal-time!) 10000)
                       ((draw 'add-portal-opacity!))
-                      ((environment 'add-obstacle) (make-power-up ((car item) 'get-type) path))))))
-        ((player 'set-selected-tower!) (car item))))
+                      ((environment 'add-obstacle) (make-power-up ((car item) 'get-type) path)))))
+            ((player 'set-selected-tower!) (car item)))))
    
     (define (dispatch mes)
       (cond ((eq? mes 'start!) (start!))

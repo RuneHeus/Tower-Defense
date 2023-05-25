@@ -11,6 +11,8 @@
          (game-over-layer ((window 'new-layer!)))
          (text (make-tile width height))
          (start-text (make-tile width height))
+         (wave-text '())
+         (wave-count-text '())
          (restart-text '())
          (previous-points '())
          (previous-health '())
@@ -42,7 +44,7 @@
       (let ((points-tile (make-tile width height))
             (life-tile (make-tile width height)))
         ((points-tile 'draw-text!) (string-append "Points: " (number->string (player 'get-points))) (* size-factor 15) (* size-factor 650) (* size-factor 50) "black")
-        ((life-tile 'draw-text!) (string-append "Health: " (number->string (player 'get-health))) (* size-factor 15) (* size-factor 500) (* size-factor 50) "black")
+        ((life-tile 'draw-text!) (string-append "Health: " (number->string (player 'get-health))) (* size-factor 15) (* size-factor 650) (* size-factor 25) "black")
         (set! restart-text (make-tile width height))
         ((restart-text 'draw-text!) "Press 'space' to restart" (* size-factor 12) (* size-factor 300) (* size-factor 30) "black")
         ((text-layer 'add-drawable!) points-tile)
@@ -90,28 +92,28 @@
 
         
         ((background-layer 'add-drawable!) tile)
-;
-;        
-;        ((text-layer 'add-drawable!) restart-text)
-;        (define (draw-stripes-horizontal!)
-;          (let loop ((pos-tile (make-tile width height))
-;                     (y 0))
-;            (cond ((> y height) ((pos-layer 'add-drawable!) pos-tile))
-;                  (else
-;                   (begin
-;                     ((pos-tile 'draw-line!) 0 y width y 1 "black")
-;                     (loop pos-tile (+ y (* 50 size-factor))))))))
-;                      
-;        (define (draw-stripes-vertical!)
-;          (let loop ((pos-tile (make-tile width height))
-;                     (x 0))
-;            (cond ((> x width) ((pos-layer 'add-drawable!) pos-tile))
-;                  (else
-;                   (begin
-;                     ((pos-tile 'draw-line!) x 0 x height 1 "black")
-;                     (loop pos-tile (+ x (* 50 size-factor))))))))         
-;        (draw-stripes-horizontal!)
-;        (draw-stripes-vertical!)
+        ;
+        ;        
+        ;        ((text-layer 'add-drawable!) restart-text)
+        ;        (define (draw-stripes-horizontal!)
+        ;          (let loop ((pos-tile (make-tile width height))
+        ;                     (y 0))
+        ;            (cond ((> y height) ((pos-layer 'add-drawable!) pos-tile))
+        ;                  (else
+        ;                   (begin
+        ;                     ((pos-tile 'draw-line!) 0 y width y 1 "black")
+        ;                     (loop pos-tile (+ y (* 50 size-factor))))))))
+        ;                      
+        ;        (define (draw-stripes-vertical!)
+        ;          (let loop ((pos-tile (make-tile width height))
+        ;                     (x 0))
+        ;            (cond ((> x width) ((pos-layer 'add-drawable!) pos-tile))
+        ;                  (else
+        ;                   (begin
+        ;                     ((pos-tile 'draw-line!) x 0 x height 1 "black")
+        ;                     (loop pos-tile (+ x (* 50 size-factor))))))))         
+        ;        (draw-stripes-horizontal!)
+        ;        (draw-stripes-vertical!)
         (draw-menu!)))
 
     (define (draw-menu!)
@@ -134,27 +136,25 @@
       ((menu-item-layer 'remove-drawable!) (portal 'get-tile))
       ((portal 'set-tile!) (make-tile image-size image-size portal-img-50 portal-mask-50))
       ((menu-item-layer 'add-drawable!) (portal 'get-tile))
-      (reposition! (portal 'get-tile) portal-pos)
-      )
+      (reposition! (portal 'get-tile) portal-pos))
 
     (define (remove-portal-opacity!)
       ((menu-item-layer 'remove-drawable!) (portal 'get-tile))
       ((portal 'set-tile!) (make-tile image-size image-size portal-img portal-mask))
-      (set-tile-position! (portal 'get-tile) portal-pos)
-      ((menu-item-layer 'add-drawable!) (portal 'get-tile)))
+      ((menu-item-layer 'add-drawable!) (portal 'get-tile))
+      (reposition! (portal 'get-tile) portal-pos))
 
     (define (add-bomb-opacity!)
       ((menu-item-layer 'remove-drawable!) (bomb 'get-tile))
       ((bomb 'set-tile!) (make-tile image-size image-size bomb-img-50 bomb-mask-50))
       ((menu-item-layer 'add-drawable!) (bomb 'get-tile))
-      (reposition! (bomb 'get-tile) bomb-pos)
-      )
+      (reposition! (bomb 'get-tile) bomb-pos))
 
     (define (remove-bomb-opacity!)
       ((menu-item-layer 'remove-drawable!) (bomb 'get-tile))
       ((bomb 'set-tile!) (make-tile image-size image-size bomb-img bomb-mask))
-      (set-tile-position! (bomb 'get-tile) bomb-pos)
-      ((menu-item-layer 'add-drawable!) (bomb 'get-tile)))
+      ((menu-item-layer 'add-drawable!) (bomb 'get-tile))
+      (reposition! (bomb 'get-tile) bomb-pos))
 
     (define (reset!)
       (remove-previous-text!)
@@ -162,7 +162,29 @@
       (draw-game-status-text)
       (remove-start-text!)
       (remove-portal-opacity!)
-      (remove-bomb-opacity!))
+      (remove-bomb-opacity!)
+      (remove-wave-text!))
+
+    (define (update-wave-count! count)
+      (if (not (null? wave-count-text))
+          ((text-layer 'remove-drawable!) wave-count-text))
+      (set! wave-count-text (make-tile width height))
+      ((wave-count-text 'draw-text!) (string-append "Wave: " (number->string count)) (* size-factor 15) (* size-factor 500) (* size-factor 25) "black")
+      ((text-layer 'add-drawable!) wave-count-text))
+
+    (define (remove-wave-count!)
+      (if (not (null? wave-count-text))
+          ((text-layer 'remove-drawable!) wave-count-text)))
+
+    (define (draw-wave-text!)
+      (set! wave-text (make-tile width height))
+      ((wave-text 'draw-text!) "Press 'w' to start wave" (* size-factor 15) (* size-factor 125) (* size-factor 25) "black")
+      ((text-layer 'add-drawable!) wave-text))
+
+    (define (remove-wave-text!)
+      (if (not (null? wave-text))
+          ((text-layer 'remove-drawable!) wave-text)
+          (set! wave-text '())))
 
     (define (dispatch mes)
       (cond ((eq? mes 'draw!) draw!)
@@ -189,5 +211,9 @@
             ((eq? mes 'add-bomb-opacity!) add-bomb-opacity!)
             ((eq? mes 'remove-bomb-opacity!) remove-bomb-opacity!)
             ((eq? mes 'reset!) reset!)
+            ((eq? mes 'draw-wave-text!) draw-wave-text!)
+            ((eq? mes 'remove-wave-text!) remove-wave-text!)
+            ((eq? mes 'update-wave-count!) update-wave-count!)
+            ((eq? mes 'remove-wave-count!) remove-wave-count!)
             (else (display "Error: Wrong dispatch message (Draw.rkt) ") (display mes))))
     dispatch))

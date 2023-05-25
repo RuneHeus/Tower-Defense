@@ -201,7 +201,10 @@
        obstacles))
 
     (define (bomb-explosion! obstacle ms)
-      ((obstacle 'get-behaviour) monsters (random 1 3) ms draw))
+      (if (not (obstacle 'exploded?))
+          (if (obstacle 'projectile?)
+              ((obstacle 'get-behaviour) monsters 3 ms draw)
+              ((obstacle 'get-behaviour) monsters (random 1 3) ms draw))))
 
     (define (set-towers! val)
       (set! towers val))
@@ -259,5 +262,6 @@
             ((eq? mes 'get-obstacles) obstacles)
             ((eq? mes 'reset!) reset!)
             ((eq? mes 'obstacle-process) obstacle-process)
+            ((eq? mes 'remove-all-projectiles!) remove-all-projectiles!)
             (else (display "Error: Wrong dispatch message (Environment.rkt) -> ") (display mes))))
     dispatch))

@@ -1,14 +1,20 @@
 (define (make-wave environment)
   (let ((wave 0)
         (wave-list '())
-        (wave-ready? #t))
+        (wave-ready? #f))
   
     (define (next-monster!)
       (if (not (null? wave-list))
           (begin ((environment 'add-entity!) (car wave-list))
                  (set! wave-list (cdr wave-list))
                  ;(set! wave-list (cons (make-monster "Blue" (make-position (start-position 'get-x) (start-position 'get-y))) wave-list))
-                 )))
+                 )
+          (if (and (null? (environment 'get-monsters)) (not wave-ready?))
+              (begin
+                (set! wave-ready? #t)
+                (((environment 'draw) 'draw-wave-text!))
+                ((environment 'remove-all-projectiles!))
+                ))))
 
     (define (fill-wave-list monster-list) ;List with monster and amount
       (define (iter lijst)
@@ -33,6 +39,7 @@
   
     (define (load-wave!)
       (set! wave (+ wave 1))
+      (((environment 'draw) 'update-wave-count!) wave)
       (cond ((= wave 1) (fill-wave-list (list (cons "Red" 3))))
             ((= wave 2) (fill-wave-list (list (cons "Blue" 1))))
             ((= wave 3) (begin
@@ -46,6 +53,11 @@
 
     (define (set-wave-ready! val)
       (set! wave-ready? val))
+
+    (define (reset!)
+      (set! wave 0)
+      (set! wave-list '())
+      (set! wave-ready? #f))
   
     (define (dispatch mes)
       (cond ((eq? mes 'next-monster!) next-monster!)
@@ -57,5 +69,6 @@
             ((eq? mes 'start-wave!) start-wave!)
             ((eq? mes 'wave-ready?) wave-ready?)
             ((eq? mes 'set-wave-ready!) set-wave-ready!)
+            ((eq? mes 'reset!) reset!)
             (else (display "Error: Wrong dispatch message (Wave.rkt) -> ") (display mes))))
     dispatch))

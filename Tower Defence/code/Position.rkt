@@ -43,10 +43,6 @@
         ((next-pos 'set-y!) (+ (next-pos 'get-y) (* speed (sin angle))))
         (set! prev-distance (calculate-distance position))
         (set! next-distance ((next-pos 'calculate-distance) position))
-        (display prev-distance)
-        (display " <= ")
-        (display next-distance)
-        (newline)
         (<= prev-distance next-distance)))
 
     (define (display-position)

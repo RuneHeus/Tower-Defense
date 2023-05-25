@@ -12,6 +12,8 @@
         (speed 8)
         (behaviour '())
         (obstacle? #f)
+        (exploded? #f)
+        (projectile? #t)
         (follow? #t))
 
     (case type
@@ -40,10 +42,12 @@
                                               (if ((position 'in-area?) (monster 'get-position) explosion-range)
                                                   ((monster 'hit!) dmg)))
                                             monsters)
+                                       (set! exploded? #t)
                                        (minus-timer ms)))))))
       ('shooter (begin
                   (set! tile (make-tile projectile-image-size projectile-image-size shooter-projectile-img shooter-projectile-mask))
                   (set! follow? #f)
+                  ((position 'set-distance-num!) 50)
                   (set! timer 1000))))
 
     (define (set-scale) ;This sets the scale of projectile
@@ -110,6 +114,9 @@
 
     (define (set-environment! env)
       (set! environment env))
+
+    (define (set-projectile? val)
+      (set! projectile? val))
     
     (define (dispatch mes)
       (cond ((eq? mes 'get-tile) tile)
@@ -126,6 +133,9 @@
             ((eq? mes 'set-tile!) set-tile!)
             ((eq? mes 'entity?) 'power-up)
             ((eq? mes 'set-angle!) set-angle!)
+            ((eq? mes 'exploded?) exploded?)
+            ((eq? mes 'set-projectile?) set-projectile?)
+            ((eq? mes 'projectile?) projectile?)
             (else (display "Error: Wrong dispatch message (Projectile.rkt) -> ") (display mes))))
     (set-scale)
     (if (and (not (null? target)) (not (eq? target 'Dummy-target)))
