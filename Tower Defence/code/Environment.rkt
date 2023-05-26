@@ -17,8 +17,7 @@
                  (begin (if (null? towers)
                             (set! towers (list entity))
                             (set! towers (append towers (list entity))))
-                        (draw-entity! entity))
-                 (display "Unable to place tower at this position")))))
+                        (draw-entity! entity))))))
 
     (define (draw-entity! entity)
       ((draw 'draw!) (entity 'get-tile)))
@@ -263,5 +262,6 @@
             ((eq? mes 'reset!) reset!)
             ((eq? mes 'obstacle-process) obstacle-process)
             ((eq? mes 'remove-all-projectiles!) remove-all-projectiles!)
+            ((eq? mes 'free-position?) free-position?)
             (else (display "Error: Wrong dispatch message (Environment.rkt) -> ") (display mes))))
     dispatch))

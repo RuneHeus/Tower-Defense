@@ -1,20 +1,14 @@
 (define (make-wave environment)
   (let ((wave 0)
+        (wave-amount 4)
         (wave-list '())
-        (wave-ready? #f))
+        (wave-ready? #f)
+        (game-over? #f))
   
     (define (next-monster!)
       (if (not (null? wave-list))
           (begin ((environment 'add-entity!) (car wave-list))
-                 (set! wave-list (cdr wave-list))
-                 ;(set! wave-list (cons (make-monster "Blue" (make-position (start-position 'get-x) (start-position 'get-y))) wave-list))
-                 )
-          (if (and (null? (environment 'get-monsters)) (not wave-ready?))
-              (begin
-                (set! wave-ready? #t)
-                (((environment 'draw) 'draw-wave-text!))
-                ((environment 'remove-all-projectiles!))
-                ))))
+                 (set! wave-list (cdr wave-list)))))
 
     (define (fill-wave-list monster-list) ;List with monster and amount
       (define (iter lijst)
@@ -25,6 +19,15 @@
                 (set! wave-list (add-element-to-list (make-monster (car monster-cons) (make-position (start-position 'get-x) (start-position 'get-y))) wave-list))))
             (iter (cdr lijst))))
       (iter monster-list))
+
+    (define (wave-process)
+      (if (and (null? wave-list) (null? (environment 'get-monsters)) (not wave-ready?))
+          (if (> (+ wave 1) wave-amount)
+              (set! game-over? #t)
+              (begin
+                (set! wave-ready? #t)
+                (((environment 'draw) 'draw-wave-text!))
+                ((environment 'remove-all-projectiles!))))))
 
     (define (start-wave!)
       (set-wave! 0)
@@ -48,7 +51,7 @@
                           (fill-wave-list (list (cons "Blue" 2)))))
             ((= wave 4) (begin
                           (fill-wave-list (list (cons "Purple" 1)))
-                          (fill-wave-list (list (cons "Blue" 3))))))
+                          (fill-wave-list (list (cons "Red" 8))))))
       (set! wave-ready? #f))
 
     (define (set-wave-ready! val)
@@ -70,5 +73,8 @@
             ((eq? mes 'wave-ready?) wave-ready?)
             ((eq? mes 'set-wave-ready!) set-wave-ready!)
             ((eq? mes 'reset!) reset!)
+            ((eq? mes 'wave-process) wave-process)
+            ((eq? mes 'wave-amount) wave-amount)
+            ((eq? mes 'game-over?) game-over?)
             (else (display "Error: Wrong dispatch message (Wave.rkt) -> ") (display mes))))
     dispatch))

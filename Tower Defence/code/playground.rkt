@@ -3,3 +3,4 @@
 
 ;(generate-mask "../images/Projectiles/shooter.png" "white")
 
+max

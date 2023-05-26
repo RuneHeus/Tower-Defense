@@ -2,19 +2,19 @@
 
 (define (make-monster type position)
   (let ((tile (make-tile image-size image-size red-monster-img red-monster-mask))
-         (health 1)
-         (angle 0)
-         (speed 2)
-         (default-speed 2)
-         (damage 1)
-         (last-path-position '())
-         (on-hit '())
-         (random-event '())
-         (on-death '())
-         (infection #f) ;Eather false or a cooldown number
-         (points 30)
-         (passsed-obstacles '())
-         (area '()))
+        (health 1)
+        (angle 0)
+        (speed 2)
+        (default-speed 2)
+        (damage 1)
+        (last-path-position '())
+        (on-hit '())
+        (random-event '())
+        (on-death '())
+        (infection #f) ;Eather false or a cooldown number
+        (points 30)
+        (passsed-obstacles '())
+        (area '()))
     
     (case type ;If red is chosen then no option is selected, then we use the default values
       ("Blue" (begin
@@ -45,10 +45,7 @@
                   (set! on-death (lambda (monsters next-pos)
                                    (map (lambda (monster)
                                           (if (not (equal? (monster 'get-type) "Purple"))
-                                              (if (and (>= ((monster 'get-position) 'get-x) (last-path-position 'get-x))
-                                                       (<= ((monster 'get-position) 'get-x) (next-pos 'get-x))
-                                                       (>= ((monster 'get-position) 'get-y) (last-path-position 'get-y))
-                                                       (<= ((monster 'get-position) 'get-y) (next-pos 'get-y)))
+                                              (if ((position 'in-area?) (monster 'get-position) 3)
                                                   ((monster 'set-health!) (+ (monster 'get-health) 1)))))
                                         monsters))))))
   

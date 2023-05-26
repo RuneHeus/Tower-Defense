@@ -6,7 +6,7 @@
 
   (let ((monster-spawn-time 0)
         (monster-move-time 0)
-        (game-loop-status #t)
+        (game-loop-status #f)
         (menu-clicked? #f))
   
     (define (start!)
@@ -15,7 +15,7 @@
        (lambda (type key)
          (if (and (eq? type 'pressed) (eq? key #\s))
              (begin
-               (load-world!)
+               (set! game-loop-status #t)
                (clean!)
                (game-loop))))))
 
@@ -28,15 +28,18 @@
       ((player 'reset!))
       ((environment 'reset!))
       ((draw 'reset!))
-      ((wave 'reset!))
-      )
+      ((wave 'reset!)))
 
-    (define (stop!)
-      ((draw 'draw-game-over-screen!))
+    (define (stop! reason)
+      (if (eq? reason 'death)
+          ((draw 'draw-game-over-screen!) "You lost!")
+          ((draw 'draw-game-over-screen!) "You won!"))
+      (set! game-loop-status #f)
       (((draw 'get-window) 'set-key-callback!)
        (lambda (type key)
          (if (and (eq? type 'pressed) (eq? key #\s))
              (begin
+               (display "Test")
                (set! game-loop-status #t)
                (clean!))))))
 
@@ -47,7 +50,7 @@
              (begin
                (if (<= (player 'get-health) 0)
                    (begin
-                     (stop!)
+                     (stop! 'death)
                      (set! game-loop-status #f)))
                (set! monster-spawn-time (+ monster-spawn-time ms))
                (set! monster-move-time (+ monster-move-time ms)); Add the extra elapsed time to time-elapsed
@@ -69,12 +72,13 @@
                      (if (not menu-clicked?)
                          (if (not (null? (player 'get-tower-selected)))
                              (if (>= (player 'get-points) ((player 'get-tower-selected) 'get-cost))
-                                 (begin
-                                   ((player 'remove-points!) ((player 'get-tower-selected) 'get-cost))
-                                   ((draw 'draw-game-status-text))
-                                   (let ((tower (make-tower ((player 'get-tower-selected) 'get-type) (make-position (- x (- (modulo x (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50)))) (- y (- (modulo y (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50))))) environment)))
-                                     ((environment 'add-entity!) tower)
-                                     ((player 'set-selected-tower!) '())))
+                                 (let ((tower (make-tower ((player 'get-tower-selected) 'get-type) (make-position (- x (- (modulo x (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50)))) (- y (- (modulo y (ceiling (* size-factor 50))) (- (ceiling (* size-factor 50)) (* size-factor 50))))) environment)))
+                                   (if (and ((environment 'free-position?) tower) (not ((path 'on-path?) tower)))
+                                       (begin
+                                         ((environment 'add-entity!) tower)
+                                         ((player 'remove-points!) ((player 'get-tower-selected) 'get-cost))
+                                         ((draw 'draw-game-status-text)))
+                                       (display "Cant place tower")))
                                  (begin (display "Not enough points!") (newline)))))))))))
       
       (((draw 'get-window) 'set-key-callback!)
@@ -87,9 +91,6 @@
                    (if (wave 'wave-ready?)
                        (begin ((wave 'load-wave!)) ((draw 'remove-wave-text!)))))
                (if (and (eq? type 'pressed) (eq? key #\m)) ((player 'set-points!) 99999999) ((draw 'draw-game-status-text))))))))
-  
-    (define (load-world!)
-      (draw 'draw-world!)) ;Call draw-world! from Draw ADT
 
     (define (time-handler ms)
       (if (>= monster-spawn-time 1000)
@@ -102,7 +103,8 @@
                  (if (not (wave 'wave-ready?))
                      ((environment 'towers-loop) ms))
                  ((environment 'obstacle-process) ms)
-                 (player-process ms))))
+                 (player-process ms)
+                 (wave-process))))
 
     (define (player-process ms)
       (if (not (null? (player 'get-portal-timer)))
@@ -118,28 +120,34 @@
                 ((draw 'remove-bomb-opacity!)))
               ((player 'bomb-minus-time) ms))))
 
+    (define (wave-process)
+      (if (wave 'game-over?)
+          (stop! 'won)
+          ((wave 'wave-process))))
+
     (define (menu-click item)
       (begin
         (set! menu-clicked? #t)
         (if (eq? ((car item) 'entity?) 'power-up)
-            (if (eq? ((car item) 'get-type) 'bomb)
-                (if (null? (player 'get-bomb-timer))
-                    (begin
-                      ((player 'set-bomb-time!) 10000)
-                      ((draw 'add-bomb-opacity!))
-                      (let ((rand-amount (random 1 5))
-                            (projectile '()))
-                        (do ((i 0 (+ i 1)))
-                          ((= i rand-amount))
-                          (begin
-                            (set! projectile (make-projectile ((car item) 'get-type) ((path'random-pos-on-path)) '() '()))
-                            ((projectile 'set-projectile?) #f)
-                            ((environment 'add-obstacle) projectile))))))
-                (if (null? (player 'get-portal-timer))
-                    (begin 
-                      ((player 'set-portal-time!) 10000)
-                      ((draw 'add-portal-opacity!))
-                      ((environment 'add-obstacle) (make-power-up ((car item) 'get-type) path)))))
+            (if (not (wave 'wave-ready?))
+                (if (eq? ((car item) 'get-type) 'bomb)
+                    (if (null? (player 'get-bomb-timer))
+                        (begin
+                          ((player 'set-bomb-time!) 10000)
+                          ((draw 'add-bomb-opacity!))
+                          (let ((rand-amount (random 1 5))
+                                (projectile '()))
+                            (do ((i 0 (+ i 1)))
+                              ((= i rand-amount))
+                              (begin
+                                (set! projectile (make-projectile ((car item) 'get-type) ((path'random-pos-on-path)) '() '()))
+                                ((projectile 'set-projectile?) #f)
+                                ((environment 'add-obstacle) projectile))))))
+                    (if (null? (player 'get-portal-timer))
+                        (begin 
+                          ((player 'set-portal-time!) 10000)
+                          ((draw 'add-portal-opacity!))
+                          ((environment 'add-obstacle) (make-power-up ((car item) 'get-type) path))))))
             ((player 'set-selected-tower!) (car item)))))
    
     (define (dispatch mes)
