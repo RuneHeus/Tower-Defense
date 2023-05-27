@@ -15,20 +15,21 @@
        (lambda (type key)
          (if (and (eq? type 'pressed) (eq? key #\s))
              (begin
-               (set! game-loop-status #t)
-               (clean!)
-               (game-loop))))))
+               (clean! #t))))))
 
     (define (reset!)
       (set! monster-spawn-time 0)
       (set! monster-move-time 0))
-    
-    (define (clean!)
+     
+    (define (clean! first?)
       (reset!)
       ((player 'reset!))
       ((environment 'reset!))
-      ((draw 'reset!))
-      ((wave 'reset!)))
+      ((wave 'reset!))
+      ((draw 'reset!) first?)
+      ((draw 'update-wave-count!) (wave 'get-wave))
+      (set! game-loop-status #t)
+      (game-loop))
 
     (define (stop! reason)
       (if (eq? reason 'death)
@@ -39,9 +40,8 @@
        (lambda (type key)
          (if (and (eq? type 'pressed) (eq? key #\s))
              (begin
-               (display "Test")
                (set! game-loop-status #t)
-               (clean!))))))
+               (clean! #f))))))
 
     (define (game-loop);This starts the game loop
       (((draw 'get-window) 'set-update-callback!)
@@ -54,8 +54,7 @@
                      (set! game-loop-status #f)))
                (set! monster-spawn-time (+ monster-spawn-time ms))
                (set! monster-move-time (+ monster-move-time ms)); Add the extra elapsed time to time-elapsed
-               (time-handler ms)
-               )))) ;Call the time handler to trigger event on certain elapsed time
+               (time-handler ms))))) ;Call the time handler to trigger event on certain elapsed time
 
       (((draw 'get-window) 'set-mouse-click-callback!) ;Reacts and acts upon mouse clicks
        (lambda (button status x y)
@@ -77,16 +76,14 @@
                                        (begin
                                          ((environment 'add-entity!) tower)
                                          ((player 'remove-points!) ((player 'get-tower-selected) 'get-cost))
-                                         ((draw 'draw-game-status-text)))
-                                       (display "Cant place tower")))
-                                 (begin (display "Not enough points!") (newline)))))))))))
+                                         ((draw 'draw-game-status-text))))))))))))))
       
       (((draw 'get-window) 'set-key-callback!)
        (lambda (type key)
          (if game-loop
              (begin 
                (if (and (eq? type 'pressed) (eq? key #\space))
-                   (begin ((draw 'draw-game-status-text)) (clean!) ((draw 'remove-wave-count!))))
+                   (begin ((draw 'draw-game-status-text)) (clean! #f) ((draw 'remove-wave-count!))))
                (if (and (eq? type 'pressed) (eq? key #\w))
                    (if (wave 'wave-ready?)
                        (begin ((wave 'load-wave!)) ((draw 'remove-wave-text!)))))
@@ -144,7 +141,7 @@
                                 ((projectile 'set-projectile?) #f)
                                 ((environment 'add-obstacle) projectile))))))
                     (if (null? (player 'get-portal-timer))
-                        (begin 
+                        (begin
                           ((player 'set-portal-time!) 10000)
                           ((draw 'add-portal-opacity!))
                           ((environment 'add-obstacle) (make-power-up ((car item) 'get-type) path))))))

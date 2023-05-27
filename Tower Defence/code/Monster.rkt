@@ -33,9 +33,11 @@
                 (set! points 60)
                 (set! tile (make-tile image-size image-size gray-monster-img gray-monster-mask))
                 (set! random-event (lambda ()
-                                     (cond ((eq? speed 1) (set! speed (+ speed (random 0 3))))
-                                           ((eq? speed 3) (set! speed (+ speed (random -2 1))))
-                                           (else (set! speed (+ speed (random -1 2)))))))))
+                                     (if (not infection)
+                                         (begin (display "Change")
+                                                (cond ((eq? speed 1) (set! speed (+ speed (random 0 3))))
+                                                      ((eq? speed 3) (set! speed (+ speed (random -2 1))))
+                                                      (else (set! speed (+ speed (random -1 2)))))))))))
       
       ("Purple" (begin
                   (set! health 4)

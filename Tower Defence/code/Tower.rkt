@@ -57,32 +57,33 @@
           (set! target #f)))
     
     (define (shoot!)
-      (if (or target (= type 5)) ;If the tower has a target
-          (begin
-            (if (= cooldown 0)
-                (if projectile
-                    (if (list? projectile)
-                        (map (lambda (proj)
-                               ((proj 'move!)))
-                             projectile)
-                        ((projectile 'move!)))
-                    (if (= type 5)
-                        (begin
-                          (remove-all-projectiles)
-                          (add-all-projectiles))
-                        (begin
-                          (let ((new-projectile (make-projectile projectile-type (make-position (position 'get-x) (position 'get-y)) target dispatch)))
-                            (set-projectile! new-projectile)
-                            ((((environment 'draw) 'projectile-layer) 'add-drawable!) (projectile 'get-tile))
-                            (set! cooldown cooldown-time)))))
-                (if projectile
-                    (if (list? projectile)
-                        (map (lambda (proj)
-                               ((proj 'move!)))
-                             projectile)
-                        ((projectile 'move!))))))
-          (if projectile
-              ((projectile 'remove-projectile)))))
+      (if (or (not (eq? type 6)) (not (eq? projectile #f)) (multiple-in-range))
+          (if (or target (= type 5)) ;If the tower has a target
+              (begin
+                (if (= cooldown 0)
+                    (if projectile
+                        (if (list? projectile)
+                            (map (lambda (proj)
+                                   ((proj 'move!)))
+                                 projectile)
+                            ((projectile 'move!)))
+                        (if (= type 5)
+                            (begin
+                              (remove-all-projectiles)
+                              (add-all-projectiles))
+                            (begin
+                              (let ((new-projectile (make-projectile projectile-type (make-position (position 'get-x) (position 'get-y)) target dispatch)))
+                                (set-projectile! new-projectile)
+                                ((((environment 'draw) 'projectile-layer) 'add-drawable!) (projectile 'get-tile))
+                                (set! cooldown cooldown-time)))))
+                    (if projectile
+                        (if (list? projectile)
+                            (map (lambda (proj)
+                                   ((proj 'move!)))
+                                 projectile)
+                            ((projectile 'move!))))))
+              (if projectile
+                  ((projectile 'remove-projectile))))))
     
     (define (set-cooldown! num)
       (set! cooldown num))
@@ -117,6 +118,14 @@
       (set! projectile (remove-el-from-list proj projectile))
       (if (null? projectile)
           (set! projectile #f)))
+
+    (define (multiple-in-range)
+      (let ((amount 0))
+        (map (lambda (monster)
+               (if ((position 'in-area?) (monster 'get-position) range)
+                   (set! amount (+ amount 1))))
+             (environment 'get-monsters))
+        (>= amount 2)))
   
     (define (dispatch mes)
       (cond ((eq? mes 'get-tile) tile)

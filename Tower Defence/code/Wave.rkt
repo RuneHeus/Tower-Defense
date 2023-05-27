@@ -58,9 +58,10 @@
       (set! wave-ready? val))
 
     (define (reset!)
-      (set! wave 0)
+      (set! wave 2)
       (set! wave-list '())
-      (set! wave-ready? #f))
+      (set! wave-ready? #f)
+      (set! game-over? #f))
   
     (define (dispatch mes)
       (cond ((eq? mes 'next-monster!) next-monster!)

@@ -22,11 +22,13 @@
               (set! damage 0)
               (set! target-pos (create-target-pos target))
               (set! obstacle? #t)
+              (set! speed 4)
               (set! behaviour (lambda (monster)
                                 ((monster 'set-speed!) (/ (monster 'get-default-speed) 2))
                                 ((monster 'set-infection!) infection-duration)))))
       ('bomb (begin
                (set! tile (make-tile net-image-size net-image-size bomb-img bomb-mask))
+               (set! speed 4)
                (if (not (eq? target 'Dummy-target))
                    (begin
                      (set! target-pos (create-target-pos target))

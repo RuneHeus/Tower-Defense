@@ -85,35 +85,7 @@
     
     (define (draw-world!)
       (let ((tile (make-tile width height "../images/World/World.png")))
-        ;        ((tile 'draw-rectangle!) 0 0 width height "green")
-        ;        ((tile 'draw-rectangle!) (start-position 'get-x) (start-position 'get-y) (* 300 size-factor) (* 50 size-factor) "brown") ;Pad ((0,5) -> (15,5)) (division)
-        ;        ((tile 'draw-rectangle!) (* 300 size-factor) (* 100 size-factor) (* size-factor 50) (* 400 size-factor) "brown") ;Pad ((15,5) -> (15,35)) (division)
-        ;        ((tile 'draw-rectangle!) (* size-factor 300) (* size-factor 500) (* 500 size-factor)  (* 50 size-factor) "brown") ;Pad ((15,35) -> (40,35)) (division)
-
-        
         ((background-layer 'add-drawable!) tile)
-        ;
-        ;        
-        ;        ((text-layer 'add-drawable!) restart-text)
-        ;        (define (draw-stripes-horizontal!)
-        ;          (let loop ((pos-tile (make-tile width height))
-        ;                     (y 0))
-        ;            (cond ((> y height) ((pos-layer 'add-drawable!) pos-tile))
-        ;                  (else
-        ;                   (begin
-        ;                     ((pos-tile 'draw-line!) 0 y width y 1 "black")
-        ;                     (loop pos-tile (+ y (* 50 size-factor))))))))
-        ;                      
-        ;        (define (draw-stripes-vertical!)
-        ;          (let loop ((pos-tile (make-tile width height))
-        ;                     (x 0))
-        ;            (cond ((> x width) ((pos-layer 'add-drawable!) pos-tile))
-        ;                  (else
-        ;                   (begin
-        ;                     ((pos-tile 'draw-line!) x 0 x height 1 "black")
-        ;                     (loop pos-tile (+ x (* 50 size-factor))))))))         
-        ;        (draw-stripes-horizontal!)
-        ;        (draw-stripes-vertical!)
         (draw-menu!)))
 
     (define (draw-menu!)
@@ -129,42 +101,42 @@
         ((tower-text 'draw-text!) "Towers" (* size-factor 20) (* size-factor 650) (* size-factor 100) "white")
         ((tower-text 'draw-text!) "Power-Ups" (* size-factor 17) (* size-factor 650) (* size-factor 250) "white")
         ((menu-layer 'add-drawable!) tower-text)
-        ((menu-layer 'add-drawable!) tile))
-      )
+        ((menu-layer 'add-drawable!) tile)))
 
     (define (add-portal-opacity!)
       ((menu-item-layer 'remove-drawable!) (portal 'get-tile))
       ((portal 'set-tile!) (make-tile image-size image-size portal-img-50 portal-mask-50))
-      ((menu-item-layer 'add-drawable!) (portal 'get-tile))
-      (reposition! (portal 'get-tile) portal-pos))
+      (reposition! (portal 'get-tile) portal-pos)
+      ((menu-item-layer 'add-drawable!) (portal 'get-tile)))
 
     (define (remove-portal-opacity!)
       ((menu-item-layer 'remove-drawable!) (portal 'get-tile))
       ((portal 'set-tile!) (make-tile image-size image-size portal-img portal-mask))
-      ((menu-item-layer 'add-drawable!) (portal 'get-tile))
-      (reposition! (portal 'get-tile) portal-pos))
+      (reposition! (portal 'get-tile) portal-pos)
+      ((menu-item-layer 'add-drawable!) (portal 'get-tile)))
 
     (define (add-bomb-opacity!)
       ((menu-item-layer 'remove-drawable!) (bomb 'get-tile))
       ((bomb 'set-tile!) (make-tile image-size image-size bomb-img-50 bomb-mask-50))
-      ((menu-item-layer 'add-drawable!) (bomb 'get-tile))
-      (reposition! (bomb 'get-tile) bomb-pos))
+      (reposition! (bomb 'get-tile) bomb-pos)
+      ((menu-item-layer 'add-drawable!) (bomb 'get-tile)))
 
     (define (remove-bomb-opacity!)
       ((menu-item-layer 'remove-drawable!) (bomb 'get-tile))
       ((bomb 'set-tile!) (make-tile image-size image-size bomb-img bomb-mask))
-      ((menu-item-layer 'add-drawable!) (bomb 'get-tile))
-      (reposition! (bomb 'get-tile) bomb-pos))
+      (reposition! (bomb 'get-tile) bomb-pos)
+      ((menu-item-layer 'add-drawable!) (bomb 'get-tile)))
 
-    (define (reset!)
-      (remove-previous-text!)
+    (define (reset! first?)
       (remove-game-over-screen!)
-      (draw-game-status-text)
+      (remove-previous-text!)
       (remove-start-text!)
-      (remove-portal-opacity!)
-      (remove-bomb-opacity!)
+      (if (not first?)
+          (begin (remove-portal-opacity!)
+                 (remove-bomb-opacity!))
+          (draw-world!))
       (remove-wave-text!)
-      (draw-world!))
+      (draw-game-status-text))
 
     (define (update-wave-count! count)
       (if (not (null? wave-count-text))

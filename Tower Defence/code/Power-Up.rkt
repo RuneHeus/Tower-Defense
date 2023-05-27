@@ -13,7 +13,7 @@
                   (set! position portal-pos)
                   (if (null? dummy?)
                       (begin
-                        (let* ((random-pos (pick-random-from-list (path 'path-positions) start-position end-position))
+                        (let* ((random-pos (pick-random-from-list (path 'path-positions) start-position path-1 end-position))
                                (next-pos ((path 'next-path-to-pos) random-pos)))
                           (set! position (random-pos-between-points random-pos next-pos)))
                       
