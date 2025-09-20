@@ -1,1 +1,1 @@
-Project ontwikkeld in het kader van Programmeerproject 1 aan de VUB
+*Project ontwikkeld in het kader van Programmeerproject 1 aan de VUB*
